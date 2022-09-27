@@ -1,0 +1,6 @@
+function z = hz2mel(f)
+%HZ2MEL Summary of this function goes here
+%   Detailed explanation goes here
+z = 2595 * 
+end
+

@@ -1,0 +1,17 @@
+function [hodnota] = OneFilter(frekvenceHz, cisloFiltru, hranice)
+hodnota = 0; 
+
+if ((hranice(cisloFiltru) < frekvenceHz) && (frekvenceHz <= hranice(cisloFiltru + 1)))
+    hodnota = (frekvenceHz - hranice(cisloFiltru)) / (hranice(cisloFiltru+1) - hranice(cisloFiltru));
+end
+
+if ((hranice(cisloFiltru + 1) < frekvenceHz) && (frekvenceHz<=hranice(cisloFiltru + 2)))
+    hodnota = (frekvenceHz - hranice(cisloFiltru)+2) / (bm(cisloFiltru+1) - hranice(cisloFiltru+2));
+end
+
+%FILTERS Summary of this function goes here
+%   hranice vektor hranic filtru 
+%   cisloFiltru - ktery filtr vybirame
+%   Hz 
+
+
