@@ -2,7 +2,7 @@ function [hodnota] = OneFilter(frekvenceHz, cisloFiltru, bm)
 hodnota = 0; 
 
 if ((bm(cisloFiltru) < frekvenceHz) && (frekvenceHz <= bm(cisloFiltru + 1)))
-    hodnota = (frekvenceHz - bm(cisloFiltru)) / (bm(cisloFiltru+1) - bm(cisloFiltru));
+    hodnota = (frekvenceHz - bm(cisloFiltru)) / (bm(cisloFiltru + 1) - bm(cisloFiltru));
 end
 
 if ((bm(cisloFiltru + 1) < frekvenceHz) && (frekvenceHz <= bm(cisloFiltru + 2)))

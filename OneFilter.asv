@@ -1,12 +1,12 @@
-function [hodnota] = OneFilter(frekvenceHz, cisloFiltru, hranice)
+function [hodnota] = OneFilter(frekvenceHz, cisloFiltru, bm)
 hodnota = 0; 
 
-if ((hranice(cisloFiltru) < frekvenceHz) && (frekvenceHz <= hranice(cisloFiltru + 1)))
-    hodnota = (frekvenceHz - hranice(cisloFiltru)) / (hranice(cisloFiltru+1) - hranice(cisloFiltru));
+if ((bm(cisloFiltru) < frekvenceHz) && (frekvenceHz <= bm(cisloFiltru + 1)))
+    hodnota = (frekvenceHz - bm(cisloFiltru)) / (bm(cisloFiltru + 1) - bm(cisloFiltru));
 end
 
-if ((hranice(cisloFiltru + 1) < frekvenceHz) && (frekvenceHz<=hranice(cisloFiltru + 2)))
-    hodnota = (frekvenceHz - hranice(cisloFiltru)+2) / (bm(cisloFiltru+1) - hranice(cisloFiltru+2));
+if ((bm(cisloFiltru + 1) < frekvenceHz) && (frekvenceHz <= bm(cisloFiltru + 2)))
+    hodnota = (frekvenceHz - bm(cisloFiltru + 2)) / (bm(cisloFiltru + 1) - bm(cisloFiltru + 2));
 end
 
 %FILTERS Summary of this function goes here
