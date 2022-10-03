@@ -54,6 +54,8 @@ n_times_window = round((length(y) - 256) / 80);
 len_segment = 256; % velikost okenka 256 vzorku 
 posun = 80; % velikost posunu 80 vzorku
 
+cepOne_matrix = [944, 15]; 
+
 for k = 0:1:n_times_window-1
     % Hammingovo okenko 
     w = hamming(len_segment);
@@ -78,8 +80,8 @@ for k = 0:1:n_times_window-1
     data_log = log10(energie); % kepstralni pristup
 
     %% Kosinova transformace
-    cepOne = dct(data_log); % TODO: ukladat do radek  
-    
+    cepOne = dct(data_log);  
+    cepOne_matrix(k+1, :) = cepOne'; % Ukladani jednotlivych hodnot do radek matice
 end
 
 figure; 
