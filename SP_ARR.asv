@@ -13,7 +13,7 @@ frek = Fs / 2; % prenasene pasmo
 mel = hz2mel(frek);
 
 counter = 0; 
-bm = []; % hranice  
+bm = []; % hranice filtru  
 idx = 1; 
 for i = 0:(mel/16):mel
     fprintf('%d %f %f \n', counter, i, mel2hz(i))
@@ -24,7 +24,7 @@ end
 
 %% Vypocet frekvenci pro filtry 
 counter = 0; 
-frekvenceHz = []; % frekvence pro filtry 
+frekvenceHz = zeros; % frekvence pro filtry 
 idx = 1; 
 for i = 0:(frek/128):frek
     fprintf('bod %d v Hz %f (v melech %f) \n', counter, i, hz2mel(i))
@@ -35,7 +35,7 @@ end
 
 %% Filters
 filters_num = 15; 
-matrix = [filters_num, 128]; 
+matrix = zeros(filters_num, 128); 
 
 for i = 1:filters_num
     for j = 1:length(frekvenceHz)-1
@@ -53,6 +53,8 @@ n_times_window = round((length(y) - 256) / 80);
 %% Rozdeleni vstupniho signalu na mikrosegmenty 
 len_segment = 256; % velikost okenka 256 vzorku 
 posun = 80; % velikost posunu 80 vzorku
+
+cepOne_matrix = zeros(944, 15); 
 
 for k = 0:1:n_times_window-1
     % Hammingovo okenko 
@@ -78,12 +80,12 @@ for k = 0:1:n_times_window-1
     data_log = log10(energie); % kepstralni pristup
 
     %% Kosinova transformace
-    cepOne = dct(data_log); % TODO: ukladat do radek  
-    
+    cepOne = dct(data_log);  
+    cepOne_matrix(k+1, :) = cepOne'; % Ukladani jednotlivych hodnot do radek matice
 end
 
 figure; 
-plot(amps); 
+plot(amps1); 
 
 
 

@@ -35,7 +35,7 @@ end
 
 %% Filters
 filters_num = 15; 
-matrix = [filters_num, 128]; 
+matrix = zeros(filters_num, 128); 
 
 for i = 1:filters_num
     for j = 1:length(frekvenceHz)-1
@@ -54,7 +54,7 @@ n_times_window = round((length(y) - 256) / 80);
 len_segment = 256; % velikost okenka 256 vzorku 
 posun = 80; % velikost posunu 80 vzorku
 
-cepOne_matrix = [944, 15]; 
+cepOne_matrix = zeros(944, 15); 
 
 for k = 0:1:n_times_window-1
     % Hammingovo okenko 
