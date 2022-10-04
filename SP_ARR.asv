@@ -15,6 +15,7 @@ mel = hz2mel(frek);
 counter = 0; 
 bm = []; % hranice filtru  
 idx = 1; 
+fprintf('Hranicni body filtru \n')
 for i = 0:(mel/16):mel
     fprintf('%d %f %f \n', counter, i, mel2hz(i))
     bm(idx) = mel2hz(i); 
@@ -22,11 +23,14 @@ for i = 0:(mel/16):mel
     idx = idx + 1; 
 end
 
-%% Vypocet frekvenci pro filtry 
-counter = 0; 
-frekvenceHz = zeros; % frekvence pro filtry 
+%% Vypocet frekvenci pro filtry (zajmove body ve spektru)
+counter = 1; 
+frekvenceHz = []; % frekvence pro filtry 
 idx = 1; 
 for i = 0:(frek/128):frek
+    if counter == 129
+        break
+    end
     fprintf('bod %d v Hz %f (v melech %f) \n', counter, i, hz2mel(i))
     frekvenceHz(idx) = i; 
     counter = counter + 1;
@@ -38,7 +42,7 @@ filters_num = 15;
 matrix = zeros(filters_num, 128); 
 
 for i = 1:filters_num
-    for j = 1:length(frekvenceHz)-1
+    for j = 1:length(frekvenceHz)
         freq = frekvenceHz(1,j); 
         hodnota = OneFilter(freq, i, bm); 
         matrix(i,j) = hodnota; 
@@ -55,17 +59,24 @@ len_segment = 256; % velikost okenka 256 vzorku
 posun = 80; % velikost posunu 80 vzorku
 
 cepOne_matrix = zeros(944, 15); 
+data_matrix = zeros(944, len_seg); 
+abs_FFT_matrix = zeros(944, 256); 
+data_ham_matrix = zeros(944, 256);
+filtry_log_matrix = zeros(944, 15); 
 
 for k = 0:1:n_times_window-1
     % Hammingovo okenko 
     w = hamming(len_segment);
     
     data = y(k * posun + 1 : k * posun + len_segment); % posun Hammingova okenka pro k-te okno
+    data_matrix(k+1, :) = data; 
      
     data_ham = data .* w;
+    data_ham_matrix(k+1, :) = data_ham; 
     
     % DFT
     data_dft = abs(fft(data_ham)); 
+    abs_FFT_matrix(k+1, :) = data_dft; 
     
     % Absolutni hodnota dat_
     %amps2 = abs(data_dft); 
@@ -78,6 +89,7 @@ for k = 0:1:n_times_window-1
    
     %% Logaritmus ve spektru 
     data_log = log10(energie); % kepstralni pristup
+    filtry_log_matrix(k+1, :) = data_log; 
 
     %% Kosinova transformace
     cepOne = dct(data_log);  
