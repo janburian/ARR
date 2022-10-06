@@ -51,6 +51,12 @@ end
 
 filters = matrix; 
 
+figure
+for f = 1:filters_num
+    plot(filters(f,:))
+    hold on
+end
+
 %% Vypocet poctu posunuti okenka 
 n_times_window = round((length(y) - 256) / 80); 
 
