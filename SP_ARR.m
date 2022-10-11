@@ -2,7 +2,7 @@ clc
 clear all
 close all
 
-%% Melovske kepstralni koeficienty - MFCC
+%% Melovske kepstralni koeficienty - MFCC (Cviceni 1)
 %% Nacteni signalu
 filename = "00010001.wav";
 [y, Fs] = audioread(filename);
@@ -104,6 +104,8 @@ end
 
 figure; 
 plot(amps1); 
+
+%% Cviceni 2
 
 
 
