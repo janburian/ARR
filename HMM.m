@@ -2,7 +2,7 @@ clc
 clear all
 close all
 
-%% Skryte markovske modely 
+%% Skryte markovske modely (Cviceni 2)
 %% Nacteni souboru .mat
 load('ANO.mat');  
 
@@ -59,6 +59,7 @@ for j = 2:1:pocet_neemitujicich_stavu
     alfa(j, 1) = (prechody_ppst(1,j) * N(1, j))'; 
 end
 
+
 % Rekurze  
 for t = 2:1:T
     for j = 2:1:pocet_neemitujicich_stavu
@@ -72,11 +73,12 @@ end
 
 alfa = alfa'; 
 
+
 % Vysledna pravdepodobnost
 vysl_ppst_alfa = 0;  
 
 for i = 2:1:pocet_neemitujicich_stavu
-    vysl_ppst_alfa = vysl_ppst_alfa + alfa(T,i) * prechody_ppst(i,5); 
+    vysl_ppst_alfa = vysl_ppst_alfa + alfa(T,i) * prechody_ppst(i,pocet_neemitujicich_stavu+1); 
 end
 
 
@@ -107,7 +109,8 @@ for j = 2:1:pocet_neemitujicich_stavu
 end
 
 
-ppst_log_beta = log(vysl_ppst_beta);
+ppst_log_beta = log(vysl_ppst_beta); %(= ppst_log_alfa)
+
 
 
 
