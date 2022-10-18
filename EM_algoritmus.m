@@ -136,11 +136,16 @@ T = 33;
 new_means = []; 
 new_covariances = []; 
 
-% for j = 2:1:N-1
-%     
-%     for t = 1:1:T
-%     end
-%     
-% end
+mean_numerator = 0; 
+mean_denumerator = 0;
+
+for t = 2:1:T 
+    for i = 1:1:13
+        mean_numerator = mean_numerator + (alfa(t,i) * beta(t,i) * priznaky(i,:)); 
+        mean_denumerator = mean_denumerator + (alfa(t,i) * beta(t,i))
+    end
+    
+    
+end
     
 
