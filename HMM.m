@@ -110,6 +110,7 @@ end
 
 
 ppst_log_beta = log(vysl_ppst_beta); %(= ppst_log_alfa)
+ 
 
 
 

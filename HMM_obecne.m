@@ -4,11 +4,11 @@ close all
 
 %% Skryte markovske modely - obecne (Cviceni 2)
 %% Nacteni souboru .mat
-filename = 'NE.mat'; 
+filename = 'ANO.mat'; 
 structure = cell2mat(struct2cell(load(filename)));
 
 %% Nacteni souboru .txt 
-filename_priznaky = 'test_3.txt'; 
+filename_priznaky = 'test_2.txt'; 
 priznaky = load(filename_priznaky); 
 
 %% Variance a stredni hodnoty jednotlivych slozek 
