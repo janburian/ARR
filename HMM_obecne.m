@@ -8,7 +8,7 @@ filename = 'ANO.mat';
 structure = cell2mat(struct2cell(load(filename)));
 
 %% Nacteni souboru .txt 
-filename_priznaky = 'test_2.txt'; 
+filename_priznaky = 'test_1.txt'; 
 priznaky = load(filename_priznaky); 
 
 %% Variance a stredni hodnoty jednotlivych slozek 

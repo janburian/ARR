@@ -5,7 +5,7 @@ clear all
 %% Nacteni souboru .txt 
 priznaky = load('test_1.txt'); 
 
-%% Ziskani strednich hodnot 
+%% Ziskani pocatecnich strednich hodnot 
 for i = 1:1:13
     mean_priznaky(1,i) = mean(priznaky(:,i)); 
     var_priznaky(1,i) = var(priznaky(:,i)); 
@@ -17,7 +17,7 @@ mean_priznaky(3,:) = mean_priznaky(1,:);
 var_priznaky(2,:) = var_priznaky(1,:);
 var_priznaky(3,:) = var_priznaky(1,:);
 
-%% Variance jednotlivych slozek a, n, o
+%% Pocatecni variance jednotlivych slozek a, n, o
 varis_a = var_priznaky(1,:); 
 varis_n = var_priznaky(2,:); 
 varis_o = var_priznaky(3,:); 
