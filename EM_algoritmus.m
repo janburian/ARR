@@ -134,18 +134,71 @@ beta = [beta zeros(33,1)];
 % vypocet novych strednich hodnot 
 T = 33; 
 new_means = []; 
-new_covariances = []; 
 
 mean_numerator = 0; 
-mean_denumerator = 0;
+mean_denominator = 0;
 
-for t = 2:1:T 
-    for i = 1:1:13
-        mean_numerator = mean_numerator + (alfa(t,i) * beta(t,i) * priznaky(i,:)); 
-        mean_denumerator = mean_denumerator + (alfa(t,i) * beta(t,i))
+for j = 2:1:pocet_neemitujicich_stavu
+    for t = 1:1:T
+        mean_numerator = mean_numerator + (alfa(t,j) * beta(t,j) * priznaky(t,:)); 
+        mean_denominator = mean_denominator + (alfa(t,j) * beta(t,j)); 
+    end
+    mean_denominator = (mean_denominator * ones(13,1))';
+    new_mean = mean_numerator ./ mean_denominator;  
+    new_means(j-1, :) = new_mean;  
+    
+    mean_denominator = 0; 
+    mean_numerator = 0; 
+end
+
+
+% vypocet novych varianci 
+new_variances = []; 
+
+var_numerator = 0; 
+var_denominator = 0;
+
+for j = 2:1:pocet_neemitujicich_stavu
+    for t = 1:1:T
+        soucin_vektoru = (priznaky(t,:) - new_means(j-1,:)') .* ((priznaky(t,:) - new_means(j-1,:)'))'; 
+        var_numerator = var_numerator + (alfa(t,j) * beta(t,j) * soucin_vektoru); 
+        var_denominator = var_denominator + (alfa(t,j) * beta(t,j)); 
+    end
+    var_denominator = (var_denominator * ones(13,1))';
+    new_cov = var_numerator ./ var_denominator; % kovariancni matice -> z hlavni diagonaly ziskam variance
+    new_variances(j-1, :) = diag(new_cov);   
+    
+    var_denominator = 0; 
+    var_numerator = 0; 
+end
+
+% nove pravdepodobnosti prechodu a_ij
+suma_num_a_ij = 0; 
+suma_denum_a_ij = 0; 
+a_ij = []; 
+
+for i = 1:1:pocet_neemitujicich_stavu
+    for j = 1:1:pocet_neemitujicich_stavu
+        for t1 = 1:1:T-1
+            suma_num_a_ij = alfa(t1,i) * prechody_ppst(i,j) * N(t1+1, j) * beta(t1+1, j); 
+        end
     end
     
-    
+   for t2 = 1:1:T
+        suma_denum_a_ij = alfa(t2,i) * beta(t2,i); 
+   end
+   
+   a_ij(i,j) = suma_num_a_ij / suma_denum_a_ij; 
 end
-    
+
+
+% nove a_{iN}
+denominator_a_iN = 0; 
+for i = 2:1:pocet_neemitujicich_stavu
+    numerator_a_iN = alfa(T,i) * beta(T,i); 
+    for t = 1:1:T
+        denominator_a_iN = denominator_a_iN + (alfa(t,i) * beta(t,i));
+    end
+    a_iN = numerator_a_iN / denominator_a_iN;
+end
 
