@@ -174,31 +174,36 @@ end
 
 % nove pravdepodobnosti prechodu a_ij
 suma_num_a_ij = 0; 
-suma_denum_a_ij = 0; 
-a_ij = []; 
+suma_denom_a_ij = 0; 
+a = []; 
 
 for i = 1:1:pocet_neemitujicich_stavu
     for j = 1:1:pocet_neemitujicich_stavu
         for t1 = 1:1:T-1
-            suma_num_a_ij = alfa(t1,i) * prechody_ppst(i,j) * N(t1+1, j) * beta(t1+1, j); 
+            suma_num_a_ij = suma_num_a_ij + alfa(t1,i) * prechody_ppst(i,j) * N(t1+1, j) * beta(t1+1, j); 
         end
     end
     
    for t2 = 1:1:T
-        suma_denum_a_ij = alfa(t2,i) * beta(t2,i); 
+       suma_denom_a_ij = suma_denom_a_ij + alfa(t2,i) * beta(t2,i); 
    end
    
-   a_ij(i,j) = suma_num_a_ij / suma_denum_a_ij; 
+   a(i,j) = suma_num_a_ij / suma_denom_a_ij; 
+   
+   suma_denom_a_ij = 0; 
+   suma_num_a_ij = 0; 
 end
 
 
 % nove a_{iN}
 denominator_a_iN = 0; 
+
 for i = 2:1:pocet_neemitujicich_stavu
     numerator_a_iN = alfa(T,i) * beta(T,i); 
     for t = 1:1:T
         denominator_a_iN = denominator_a_iN + (alfa(t,i) * beta(t,i));
     end
-    a_iN = numerator_a_iN / denominator_a_iN;
+    a(i,pocet_neemitujicich_stavu) = numerator_a_iN / denominator_a_iN;
+    denominator_a_iN = 0; 
 end
 
