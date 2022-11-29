@@ -80,6 +80,15 @@ def change_format_ngrams(ngrams:list):
             result_list.append(new_format)
     return result_list
 
+def trimm_off_trigrams(trigrams:dict):
+    keys_to_delete = []
+    for key in trigrams:
+        if trigrams[key] == 1:
+            keys_to_delete.append(key)
+
+    for key_delete in keys_to_delete:
+        del trigrams[key_delete]
+
 if __name__ == "__main__":
     words_list = load_file('cestina.txt')
     training_list = load_training_file('train.txt')
@@ -93,17 +102,18 @@ if __name__ == "__main__":
     list_sentence_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
     words_list = get_list_from_lists(list_sentence_words)
 
-    unigramy = create_ngrams(words_list, 1)
-    bigramy = create_ngrams(words_list, 2)
-    trigramy = create_ngrams(words_list, 3)
+    unigrams = create_ngrams(words_list, 1)
+    bigrams = create_ngrams(words_list, 2)
+    trigrams = create_ngrams(words_list, 3)
 
-    #unigramy_new_format = change_format_ngrams(unigramy)
-    #bigramy_new_format = change_format_ngrams(bigramy)
-    #trigramy_new_format = change_format_ngrams(trigramy)
+    #unigramy_new_format = change_format_ngrams(unigrams)
+    #bigramy_new_format = change_format_ngrams(bigrams)
+    #trigramy_new_format = change_format_ngrams(trigrams)
 
-    unigramy_dictionary = create_dictionary(unigramy)
-    bigramy_dictionary = create_dictionary(bigramy)
-    trigramy_dictionary = create_dictionary(trigramy)
+    unigrams_dictionary = create_dictionary(unigrams)
+    bigrams_dictionary = create_dictionary(bigrams)
+    trigrams_dictionary = create_dictionary(trigrams)
 
+    trimm_off_trigrams(trigrams_dictionary)
 
     print()
