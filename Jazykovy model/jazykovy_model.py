@@ -41,10 +41,12 @@ def create_ngrams(text:list, n):
 def create_dictionary(ngrams:list):
     dictionary = {}
     for ngram in ngrams:
-        if ngram not in dictionary:
-            dictionary[ngram] = 1
-        else:
-            dictionary[ngram] += 1
+        if not '<unk>' in ngram:
+            key = " ".join(ngram)
+            if key not in dictionary:
+                dictionary[key] = 1
+            else:
+                dictionary[key] += 1
     return dictionary
 
 def get_words_train(train_sentences:list):
@@ -70,7 +72,7 @@ def check_words_dictionary(list_sentence_words:list, dictionary):
                 sentence_words[idx] = '<unk>'
     return list_sentence_words
 
-def change_format_ngrams(ngrams: list):
+def change_format_ngrams(ngrams:list):
     result_list = []
     for ngram in ngrams:
         if not '<unk>' in ngram:
@@ -95,13 +97,13 @@ if __name__ == "__main__":
     bigramy = create_ngrams(words_list, 2)
     trigramy = create_ngrams(words_list, 3)
 
-    unigramy_new_format = change_format_ngrams(unigramy)
-    bigramy_new_format = change_format_ngrams(bigramy)
-    trigramy_new_format = change_format_ngrams(trigramy)
+    #unigramy_new_format = change_format_ngrams(unigramy)
+    #bigramy_new_format = change_format_ngrams(bigramy)
+    #trigramy_new_format = change_format_ngrams(trigramy)
 
-    unigramy_dictionary = create_dictionary(unigramy_new_format)
-    bigramy_dictionary = create_dictionary(bigramy_new_format)
-    trigramy_dictionary = create_dictionary(trigramy_new_format)
+    unigramy_dictionary = create_dictionary(unigramy)
+    bigramy_dictionary = create_dictionary(bigramy)
+    trigramy_dictionary = create_dictionary(trigramy)
 
 
     print()
