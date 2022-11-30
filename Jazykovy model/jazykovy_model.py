@@ -94,11 +94,15 @@ def trimm_off_trigrams(trigrams:dict, frequency:int):
     for key_delete in keys_to_delete:
         del trigrams[key_delete]
 
-def delete_shorter_ngrams(ngrams:dict, n:int):
-    for key in ngrams:
-        test = len(key)
-        if len(key) < n:
-            del ngrams[key]
+def count_words(words_list:list):
+    counter = 0
+    for word in words_list:
+        if word == '</s>':
+            counter += 0
+        else:
+            counter += 1
+
+    return counter
 
 if __name__ == "__main__":
     words_list = load_file('cestina.txt')
@@ -112,6 +116,7 @@ if __name__ == "__main__":
     #dictionary = create_dictionary(words_set)
     list_sentences_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
     words_list = get_list_from_lists(list_sentences_words)
+    test = count_words(words_list)
 
     unigrams = create_ngrams(list_sentences_words, 1)
     bigrams = create_ngrams(list_sentences_words, 2)
@@ -127,7 +132,7 @@ if __name__ == "__main__":
     trigrams_dictionary = create_dictionary(trigrams, 3)
     #zerograms_dictionary = create_dictionary(zerograms, 0)
 
-    delete_shorter_ngrams(trigrams_dictionary, 3)
+
     trimm_off_trigrams(trigrams_dictionary, 1)
 
 
