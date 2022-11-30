@@ -32,21 +32,26 @@ def create_training_set(training:list):
 
     return words_set
 
-def create_ngrams(text:list, n):
-    n_grams = []
-    for i in range(len(text)):
-        n_grams.append(text[i: i + n])
-    return n_grams
+def create_ngrams(list_words_in_sentences:list, n:int):
+    n_grams_result = []
+    for sentence in list_words_in_sentences:
+        n_grams = []
+        for i in range(len(sentence)):
+            n_grams.append(sentence[i: i + n])
+        n_grams_result.append(n_grams)
 
-def create_dictionary(ngrams:list):
+    return n_grams_result
+
+def create_dictionary(ngrams_sentences:list, n:int):
     dictionary = {}
-    for ngram in ngrams:
-        if not '<unk>' in ngram:
-            key = " ".join(ngram)
-            if key not in dictionary:
-                dictionary[key] = 1
-            else:
-                dictionary[key] += 1
+    for ngram_sentence in ngrams_sentences:
+        for ngram in ngram_sentence:
+            if len(ngram) == n: # smazani kratsich ngramu
+                key = " ".join(ngram)
+                if key not in dictionary:
+                    dictionary[key] = 1
+                else:
+                    dictionary[key] += 1
     return dictionary
 
 def get_words_train(train_sentences:list):
@@ -63,7 +68,7 @@ def get_list_from_lists(list_of_lists: list):
             result_list.append(item)
     return result_list
 
-def check_words_dictionary(list_sentence_words:list, dictionary):
+def check_words_dictionary(list_sentence_words:list, dictionary:set):
     for sentence_words in list_sentence_words:
         idx = -1
         for word in sentence_words:
@@ -80,14 +85,20 @@ def change_format_ngrams(ngrams:list):
             result_list.append(new_format)
     return result_list
 
-def trimm_off_trigrams(trigrams:dict):
+def trimm_off_trigrams(trigrams:dict, frequency:int):
     keys_to_delete = []
     for key in trigrams:
-        if trigrams[key] == 1:
+        if trigrams[key] == frequency:
             keys_to_delete.append(key)
 
     for key_delete in keys_to_delete:
         del trigrams[key_delete]
+
+def delete_shorter_ngrams(ngrams:dict, n:int):
+    for key in ngrams:
+        test = len(key)
+        if len(key) < n:
+            del ngrams[key]
 
 if __name__ == "__main__":
     words_list = load_file('cestina.txt')
@@ -99,21 +110,25 @@ if __name__ == "__main__":
     training_list_final = get_words_train(training_list)
     #training_set = create_training_set(training_list)
     #dictionary = create_dictionary(words_set)
-    list_sentence_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
-    words_list = get_list_from_lists(list_sentence_words)
+    list_sentences_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
+    words_list = get_list_from_lists(list_sentences_words)
 
-    unigrams = create_ngrams(words_list, 1)
-    bigrams = create_ngrams(words_list, 2)
-    trigrams = create_ngrams(words_list, 3)
+    unigrams = create_ngrams(list_sentences_words, 1)
+    bigrams = create_ngrams(list_sentences_words, 2)
+    trigrams = create_ngrams(list_sentences_words, 3)
+    #zerograms = create_ngrams(list_sentences_words, 0)
 
     #unigramy_new_format = change_format_ngrams(unigrams)
     #bigramy_new_format = change_format_ngrams(bigrams)
     #trigramy_new_format = change_format_ngrams(trigrams)
 
-    unigrams_dictionary = create_dictionary(unigrams)
-    bigrams_dictionary = create_dictionary(bigrams)
-    trigrams_dictionary = create_dictionary(trigrams)
+    unigrams_dictionary = create_dictionary(unigrams, 1)
+    bigrams_dictionary = create_dictionary(bigrams, 2)
+    trigrams_dictionary = create_dictionary(trigrams, 3)
+    #zerograms_dictionary = create_dictionary(zerograms, 0)
 
-    trimm_off_trigrams(trigrams_dictionary)
+    delete_shorter_ngrams(trigrams_dictionary, 3)
+    trimm_off_trigrams(trigrams_dictionary, 1)
+
 
     print()
