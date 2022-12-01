@@ -1,4 +1,5 @@
 import os
+import math
 
 # Nacteni souboru
 def load_file(filename:str):
@@ -104,6 +105,31 @@ def count_words(words_list:list):
 
     return counter
 
+def create_ARPA_file(zerograms, unigrams:dict, bigrams:dict, trigrams:dict):
+    f = open("language_model.txt", "w", encoding="cp1250")
+    f.write("\\data\\\nngram 1 = " + str(len(unigrams)) + "\nngram 2 = " + str(len(bigrams)) + "\nngram 3 = " + str(len(trigrams)) + "\n")
+
+    cardinality = len(unigrams)
+    delta = 0
+
+    f.write("\n\\1-grams: \n")
+    for unigram, freq in sorted(unigrams.items()):
+        prob = math.log10(float(freq + delta) / (zerograms + delta * cardinality))
+        f.write(f"{prob} {unigram}\n")
+
+    f.write("\n\\2-grams: \n")
+    #for bigram, freq in sorted(bigrams.items()):
+        #prob = math.log10(float(freq + delta) / (unigrams[(bigram[0])] + delta * cardinality))
+        #f.write(f"{prob} {bigram[0]} {bigram[1]}\n")
+
+    f.write("\n\\3-grams: \n")
+    #for bigram, freq in sorted(bigrams.items()):
+        #prob = math.log10(float(freq + delta) / (unigrams[(bigram[0])] + delta * cardinality))
+        #f.write(f"{prob} {bigram[0]} {bigram[1]}\n")
+
+    f.write("\\end\\")
+    f.close()
+
 if __name__ == "__main__":
     words_list = load_file('cestina.txt')
     training_list = load_training_file('train.txt')
@@ -116,12 +142,11 @@ if __name__ == "__main__":
     #dictionary = create_dictionary(words_set)
     list_sentences_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
     words_list = get_list_from_lists(list_sentences_words)
-    test = count_words(words_list)
 
+    zerograms = count_words(words_list)
     unigrams = create_ngrams(list_sentences_words, 1)
     bigrams = create_ngrams(list_sentences_words, 2)
     trigrams = create_ngrams(list_sentences_words, 3)
-    #zerograms = create_ngrams(list_sentences_words, 0)
 
     #unigramy_new_format = change_format_ngrams(unigrams)
     #bigramy_new_format = change_format_ngrams(bigrams)
@@ -130,10 +155,8 @@ if __name__ == "__main__":
     unigrams_dictionary = create_dictionary(unigrams, 1)
     bigrams_dictionary = create_dictionary(bigrams, 2)
     trigrams_dictionary = create_dictionary(trigrams, 3)
-    #zerograms_dictionary = create_dictionary(zerograms, 0)
-
 
     trimm_off_trigrams(trigrams_dictionary, 1)
 
-
+    create_ARPA_file(zerograms, unigrams_dictionary, bigrams_dictionary, trigrams_dictionary)
     print()
