@@ -177,21 +177,21 @@ suma_num_a_ij = 0;
 suma_denom_a_ij = 0; 
 a = []; 
 
-for t1 = 1:1:T-1
-    for i = 2:1:pocet_neemitujicich_stavu
-        for j = 2:1:pocet_neemitujicich_stavu
+
+for i = 2:1:pocet_neemitujicich_stavu
+    for j = 2:1:pocet_neemitujicich_stavu
+        for t1 = 1:1:T-1
             suma_num_a_ij = suma_num_a_ij + alfa(t1,i) * prechody_ppst(i,j) * N(t1+1, j) * beta(t1+1, j);
         end
+        
+        for t2 = 1:1:T
+           suma_denom_a_ij = suma_denom_a_ij + alfa(t2,i) * beta(t2,i); 
+        end
+        
+        a(i,j) = suma_num_a_ij / suma_denom_a_ij
+        suma_denom_a_ij = 0; 
+        suma_num_a_ij = 0; 
     end
-    
-   for t2 = 1:1:T
-       suma_denom_a_ij = suma_denom_a_ij + alfa(t2,i) * beta(t2,i); 
-   end
-   
-   a(i,j) = suma_num_a_ij / suma_denom_a_ij
-   
-   suma_denom_a_ij = 0; 
-   suma_num_a_ij = 0; 
 end
 
 %%
