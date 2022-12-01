@@ -1,7 +1,7 @@
 clc
 close all
 clear all 
-%% EM algoritmus (cviceni 3) 
+%% EM algoritmus (Cviceni 3) 
 %% Nacteni souboru .txt 
 priznaky = load('test_1.txt'); 
 
@@ -177,10 +177,10 @@ suma_num_a_ij = 0;
 suma_denom_a_ij = 0; 
 a = []; 
 
-for i = 1:1:pocet_neemitujicich_stavu
-    for j = 1:1:pocet_neemitujicich_stavu
-        for t1 = 1:1:T-1
-            suma_num_a_ij = suma_num_a_ij + alfa(t1,i) * prechody_ppst(i,j) * N(t1+1, j) * beta(t1+1, j); 
+for t1 = 1:1:T-1
+    for i = 2:1:pocet_neemitujicich_stavu
+        for j = 2:1:pocet_neemitujicich_stavu
+            suma_num_a_ij = suma_num_a_ij + alfa(t1,i) * prechody_ppst(i,j) * N(t1+1, j) * beta(t1+1, j);
         end
     end
     
@@ -188,13 +188,13 @@ for i = 1:1:pocet_neemitujicich_stavu
        suma_denom_a_ij = suma_denom_a_ij + alfa(t2,i) * beta(t2,i); 
    end
    
-   a(i,j) = suma_num_a_ij / suma_denom_a_ij; 
+   a(i,j) = suma_num_a_ij / suma_denom_a_ij
    
    suma_denom_a_ij = 0; 
    suma_num_a_ij = 0; 
 end
 
-
+%%
 % nove a_{iN}
 denominator_a_iN = 0; 
 
