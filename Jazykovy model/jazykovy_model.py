@@ -1,4 +1,3 @@
-import os
 import math
 
 # Nacteni souboru
@@ -105,7 +104,7 @@ def count_words(words_list:list):
 
     return counter
 
-def create_ARPA_file(zerograms, unigrams:dict, bigrams:dict, trigrams:dict):
+def create_ARPA_file(zerograms:int, unigrams:dict, bigrams:dict, trigrams:dict):
     f = open("language_model.txt", "w", encoding="cp1250")
     f.write("\\data\\\nngram 1 = " + str(len(unigrams)) + "\nngram 2 = " + str(len(bigrams)) + "\nngram 3 = " + str(len(trigrams)) + "\n")
 
@@ -118,14 +117,16 @@ def create_ARPA_file(zerograms, unigrams:dict, bigrams:dict, trigrams:dict):
         f.write(f"{prob} {unigram}\n")
 
     f.write("\n\\2-grams: \n")
-    #for bigram, freq in sorted(bigrams.items()):
-        #prob = math.log10(float(freq + delta) / (unigrams[(bigram[0])] + delta * cardinality))
-        #f.write(f"{prob} {bigram[0]} {bigram[1]}\n")
+    for bigram, freq in sorted(bigrams.items()):
+        bigram_list = list(bigram.split(" "))
+        prob = math.log10(float(freq + delta) / (unigrams[(bigram_list[0])] + delta * cardinality))
+        f.write(f"{prob} {bigram_list[0]} {bigram_list[1]}\n")
 
     f.write("\n\\3-grams: \n")
-    #for bigram, freq in sorted(bigrams.items()):
-        #prob = math.log10(float(freq + delta) / (unigrams[(bigram[0])] + delta * cardinality))
-        #f.write(f"{prob} {bigram[0]} {bigram[1]}\n")
+    for trigram, freq in sorted(trigrams.items()):
+        trigram_list = list(trigram.split(" "))
+        prob = math.log10(float(freq + delta) / (bigrams[(trigram_list[0] + " " + trigram_list[1])] + delta * cardinality))
+        f.write(f"{prob} {trigram_list[0]} {trigram_list[1]} {trigram_list[2]}\n")
 
     f.write("\\end\\")
     f.close()
@@ -136,10 +137,10 @@ if __name__ == "__main__":
 
     words_list_final = delete_new_lines(words_list)
     words_set = set(words_list_final)
+    words_set.add("<s>")
+    words_set.add("</s>")
 
     training_list_final = get_words_train(training_list)
-    #training_set = create_training_set(training_list)
-    #dictionary = create_dictionary(words_set)
     list_sentences_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
     words_list = get_list_from_lists(list_sentences_words)
 
@@ -147,10 +148,6 @@ if __name__ == "__main__":
     unigrams = create_ngrams(list_sentences_words, 1)
     bigrams = create_ngrams(list_sentences_words, 2)
     trigrams = create_ngrams(list_sentences_words, 3)
-
-    #unigramy_new_format = change_format_ngrams(unigrams)
-    #bigramy_new_format = change_format_ngrams(bigrams)
-    #trigramy_new_format = change_format_ngrams(trigrams)
 
     unigrams_dictionary = create_dictionary(unigrams, 1)
     bigrams_dictionary = create_dictionary(bigrams, 2)
