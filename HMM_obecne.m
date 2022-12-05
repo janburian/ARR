@@ -87,6 +87,7 @@ for i = 2:pocet_neemitujicich_stavu
     beta(T, i) = prechody_ppst(i, N_stavy); 
 end
 
+
 % Rekurze  
 for t = T-1:-1:1
     for i = 2:1:pocet_neemitujicich_stavu
@@ -97,6 +98,7 @@ for t = T-1:-1:1
         suma = 0;
     end
 end
+
 
 % Vysledna pravdepodobnost
 vysl_ppst_beta = 0;  

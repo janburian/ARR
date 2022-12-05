@@ -188,7 +188,7 @@ for i = 2:1:pocet_neemitujicich_stavu
            suma_denom_a_ij = suma_denom_a_ij + alfa(t2,i) * beta(t2,i); 
         end
         
-        a(i,j) = suma_num_a_ij / suma_denom_a_ij
+        a(i,j) = suma_num_a_ij / suma_denom_a_ij;
         suma_denom_a_ij = 0; 
         suma_num_a_ij = 0; 
     end
@@ -203,7 +203,10 @@ for i = 2:1:pocet_neemitujicich_stavu
     for t = 1:1:T
         denominator_a_iN = denominator_a_iN + (alfa(t,i) * beta(t,i));
     end
-    a(i,pocet_neemitujicich_stavu) = numerator_a_iN / denominator_a_iN;
+    a(i,pocet_neemitujicich_stavu+1) = numerator_a_iN / denominator_a_iN;
     denominator_a_iN = 0; 
 end
+
+a(1,2) = A(1,2); 
+a = [a; zeros(1,5)]
 
