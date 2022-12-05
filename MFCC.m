@@ -6,7 +6,7 @@ close all
 %% Nacteni signalu
 filename = "00010001.wav";
 [y, Fs] = audioread(filename);
-plot(y);
+%plot(y);
 
 %% Hz to mel (Hranicni body filtru)
 frek = Fs / 2; % prenasene pasmo 
@@ -23,6 +23,7 @@ for i = 0:(mel/16):mel
     idx = idx + 1; 
 end
 
+fprintf('\n')
 %% Vypocet frekvenci pro filtry (zajmove body ve spektru)
 counter = 1; 
 frekvenceHz = []; % frekvence pro filtry 
@@ -51,11 +52,11 @@ end
 
 filters = matrix; 
 
-figure
-for f = 1:filters_num
-    plot(filters(f,:))
-    hold on
-end
+% figure
+% for f = 1:filters_num
+%     plot(filters(f,:))
+%     hold on
+% end
 
 %% Vypocet poctu posunuti okenka 
 n_times_window = round((length(y) - 256) / 80); 
@@ -102,10 +103,8 @@ for k = 0:1:n_times_window-1
     cepOne_matrix(k+1, :) = cepOne'; % Ukladani jednotlivych hodnot do radek matice
 end
 
-figure; 
-plot(amps1); 
-
-%% Cviceni 2
+% figure; 
+% plot(amps1); 
 
 
 

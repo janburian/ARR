@@ -1,12 +1,11 @@
-function [new_means_cell, new_variances, a] = EM_algorithm(pocet_neemitujicich_stavu, alfa, beta, N, priznaky, prechody_ppst, A)
+function [new_means, new_variances, a] = EM_algorithm(pocet_neemitujicich_stavu, alfa, beta, N, priznaky, prechody_ppst, A)
     % vypocet novych strednich hodnot 
     T = 33; 
     new_means = []; 
 
     mean_numerator = 0; 
     mean_denominator = 0;
-    
-    new_means_cell = cell(1,3);
+   
     for j = 2:1:pocet_neemitujicich_stavu
         for t = 1:1:T
             mean_numerator = mean_numerator + (alfa(t,j) * beta(t,j) * priznaky(t,:)); 
@@ -15,15 +14,13 @@ function [new_means_cell, new_variances, a] = EM_algorithm(pocet_neemitujicich_s
         mean_denominator = (mean_denominator * ones(13,1))';
         new_mean = mean_numerator ./ mean_denominator;  
         new_means(j-1, :) = new_mean;  
-        new_means_cell{j-1} = new_mean; 
+        %new_means_cell{j-1} = new_mean; 
         
         mean_denominator = 0; 
         mean_numerator = 0; 
     end
     
      
- 
-
     % vypocet novych varianci 
     new_variances = []; 
 
@@ -44,14 +41,11 @@ function [new_means_cell, new_variances, a] = EM_algorithm(pocet_neemitujicich_s
         var_numerator = 0; 
     end
     
-    output_variances = new_variances; 
     
-
     % nove pravdepodobnosti prechodu a_ij
     suma_num_a_ij = 0; 
     suma_denom_a_ij = 0; 
     a = []; 
-
 
     for i = 2:1:pocet_neemitujicich_stavu
         for j = 2:1:pocet_neemitujicich_stavu

@@ -54,7 +54,11 @@ A = [0 1.0 0 0 0;
      0 0 0 0   0]; 
  
 %% Forward-backward algoritmus
-prechody_ppst = A; 
+diary log.txt
+mean_priznaky
+var_priznaky
+prechody_ppst = A
+
 pocet_neemitujicich_stavu = 4; 
 suma = 0; 
 T = length(priznaky);
@@ -77,11 +81,22 @@ for i = 1:7
     new_covs{2} = diag(new_variances(2,:)); 
     new_covs{3} = diag(new_variances(3,:)); 
     
+    new_means_cell = cell(1,3); 
+    new_means_cell{1} = new_means(1,:); 
+    new_means_cell{2} = new_means(2,:); 
+    new_means_cell{3} = new_means(3,:);
+    
+   
+    disp('---------------------------------------------------------------')
     ppst_log_alfa
-    means = new_means
+    disp('---------------------------------------------------------------')
+    disp(i + ". reestimace" )
+    new_means
     new_variances
+    
+    means = new_means_cell; 
     covs = new_covs; 
     prechody_ppst = a
 end
-
+diary off
 
