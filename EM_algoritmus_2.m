@@ -59,7 +59,7 @@ pocet_neemitujicich_stavu = 4;
 suma = 0; 
 T = length(priznaky);
 
-for i = 1:5
+for i = 1:7
     %% Vypocet hustot pravdepodobnosti
     N = prob_densities(priznaky, means, covs); 
 
