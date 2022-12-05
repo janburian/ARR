@@ -77,9 +77,11 @@ for i = 1:7
     new_covs{2} = diag(new_variances(2,:)); 
     new_covs{3} = diag(new_variances(3,:)); 
     
-    means = new_means;
+    ppst_log_alfa
+    means = new_means
+    new_variances
     covs = new_covs; 
-    prechody_ppst = a;
+    prechody_ppst = a
 end
 
 
