@@ -57,52 +57,59 @@ def viterbi(probs: list, leaves: dict, mesh: dict):
     N = len(leaves.keys())
     T = len(probs)
 
-    values = []
-
     for word in mesh:
         values = []
-        for j in range(0, N):
-            first_char = word[0]
-            idx = list(leaves.keys()).index(first_char)
-            if j == 0:
-                list_stavu = probs[j] # prvni radka
-                first_value = float(list_stavu[idx])
-                log = -math.log10(first_value)
-                values.append(log)
-            else:
-                values.append(math.inf)
-
+        for char in word:
+            idx = list(leaves.keys()).index(char)
+            list_stavu = probs[0] # beru pouze prvni radek
+            first_value = float(list_stavu[idx])
+            log = -math.log10(first_value)
+            values.append(log)
         prices_init.append(values)
 
     print()
-    prices_init = []
-
 
     # Iterativni vypocet
-    '''
-    min = 50
+    min = get_min(prices_init)
 
-    for list in prices_init:
-        tmp = min(list)
-        if tmp < min:
-            min = tmp
+    prices_it = []
+
+    for word in mesh:
+        for t in range(1, T):
+            word = mesh[t]
+            N = len(word)
+
+            for j in range(0, N):
+                first_char = word[j]
+                char_idx = list(leaves.keys()).index(first_char)
+                prices = prices_init[j]
+                transitions = leaves[first_char]
+
+                if j == 0:
+                    value_1 = min
+                    value_2 = prices[t-1] - math.log10(transitions[j])
+
+                else:
+                    prices_1 = prices[j-1]
+                    price_2 = prices[j]
+
+                    value_1 = prices_1[t-1] - math.log10(transitions[j-1])
+                    value_2 = price_2[t] - math.log10(transitions[j])
+
+                    res = min(value_1, value_2)
+
+
+
+
+def get_min(prices_init):
+    minimum = math.inf
+    for probabilities in prices_init:
+        temp = min(probabilities)
+        if temp < minimum:
+            minimum = temp
         continue
-    '''
 
-
-    for t in range(1, T):
-        word = mesh[t]
-        N = len(word)
-
-        for j in range(0, N):
-            first_char = word[j]
-            char_idx = list(leaves.keys()).index(first_char)
-            prices = prices_init[j]
-
-
-
-
-
+    return minimum
 
 
 if __name__ == "__main__":
