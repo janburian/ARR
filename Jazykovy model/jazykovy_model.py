@@ -47,6 +47,7 @@ def create_dictionary(ngrams_sentences:list, n:int):
                     dictionary[key] = 1
                 else:
                     dictionary[key] += 1
+
     return dictionary
 
 def get_words_train(train_sentences:list):
@@ -54,6 +55,7 @@ def get_words_train(train_sentences:list):
     for sentence in train_sentences:
         words = sentence.split(" ")
         words_list.append(words)
+
     return words_list # list listu slov jednotlivych vet
 
 def get_list_from_lists(list_of_lists: list):
@@ -61,6 +63,7 @@ def get_list_from_lists(list_of_lists: list):
     for sublist in list_of_lists:
         for item in sublist:
             result_list.append(item)
+
     return result_list
 
 def check_words_dictionary(list_sentence_words:list, dictionary:set):
@@ -70,6 +73,7 @@ def check_words_dictionary(list_sentence_words:list, dictionary:set):
             idx += 1
             if word not in dictionary:
                 sentence_words[idx] = '<unk>'
+
     return list_sentence_words
 
 def change_format_ngrams(ngrams:list):
@@ -78,6 +82,7 @@ def change_format_ngrams(ngrams:list):
         if not '<unk>' in ngram:
             new_format = ''.join(map(str, ngram))
             result_list.append(new_format)
+            
     return result_list
 
 def trimm_off_trigrams(trigrams:dict, frequency:int):
