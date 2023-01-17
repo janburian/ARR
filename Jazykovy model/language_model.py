@@ -1,14 +1,16 @@
 import math
 from pathlib import Path
 
-def load_file(filename:Path):
+
+def load_file(filename: Path):
     with open(filename, 'r', encoding='cp1250') as file:
         words = file.read().splitlines()
     file.close()
 
     return words
 
-def load_training_file(filename:Path):
+
+def load_training_file(filename: Path):
     words_lines = []
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
@@ -17,17 +19,10 @@ def load_training_file(filename:Path):
             words_lines.append(sentence)
     file.close()
 
-    return words_lines # list listu (list vet), kde list = 1 veta
+    return words_lines  # list listu (list vet), kde list = 1 veta
 
-def create_training_set(training:list):
-    words_set = set()
-    for sentence in training:
-        for word in sentence:
-            words_set.add(word)
 
-    return words_set
-
-def create_ngrams(list_words_in_sentences:list, n:int):
+def create_ngrams(list_words_in_sentences: list, n: int):
     n_grams_result = []
     for sentence in list_words_in_sentences:
         n_grams = []
@@ -37,11 +32,12 @@ def create_ngrams(list_words_in_sentences:list, n:int):
 
     return n_grams_result
 
-def create_dictionary(ngrams_sentences:list, n:int):
+
+def create_dictionary(ngrams_sentences: list, n: int):
     dictionary = {}
     for ngram_sentence in ngrams_sentences:
         for ngram in ngram_sentence:
-            if len(ngram) == n: # smazani kratsich ngramu
+            if len(ngram) == n:  # smazani kratsich ngramu
                 key = " ".join(ngram)
                 if key not in dictionary:
                     dictionary[key] = 1
@@ -50,13 +46,15 @@ def create_dictionary(ngrams_sentences:list, n:int):
 
     return dictionary
 
-def get_words_train(train_sentences:list):
+
+def get_words_train(train_sentences: list):
     words_list = []
     for sentence in train_sentences:
         words = sentence.split(" ")
         words_list.append(words)
 
-    return words_list # list listu slov jednotlivych vet
+    return words_list  # list listu slov jednotlivych vet
+
 
 def get_list_from_lists(list_of_lists: list):
     result_list = []
@@ -66,7 +64,8 @@ def get_list_from_lists(list_of_lists: list):
 
     return result_list
 
-def check_words_dictionary(list_sentence_words:list, dictionary:set):
+
+def check_words_dictionary(list_sentence_words: list, dictionary: set):
     for sentence_words in list_sentence_words:
         idx = -1
         for word in sentence_words:
@@ -76,16 +75,8 @@ def check_words_dictionary(list_sentence_words:list, dictionary:set):
 
     return list_sentence_words
 
-def change_format_ngrams(ngrams:list):
-    result_list = []
-    for ngram in ngrams:
-        if not '<unk>' in ngram:
-            new_format = ''.join(map(str, ngram))
-            result_list.append(new_format)
-            
-    return result_list
 
-def trimm_off_trigrams(trigrams:dict, frequency:int):
+def trimm_off_trigrams(trigrams: dict, frequency: int):
     keys_to_delete = []
     for key in trigrams:
         if trigrams[key] == frequency:
@@ -94,7 +85,8 @@ def trimm_off_trigrams(trigrams:dict, frequency:int):
     for key_delete in keys_to_delete:
         del trigrams[key_delete]
 
-def count_words(words_list:list):
+
+def count_words(words_list: list):
     counter = 0
     for word in words_list:
         if word == '</s>':
@@ -104,9 +96,11 @@ def count_words(words_list:list):
 
     return counter
 
-def create_ARPA_file(path_ARPA_file:Path, zerograms:int, unigrams:dict, bigrams:dict, trigrams:dict):
+
+def create_ARPA_file(path_ARPA_file: Path, zerograms: int, unigrams: dict, bigrams: dict, trigrams: dict):
     f = open(path_ARPA_file, "w", encoding="cp1250")
-    f.write("\\data\\\nngram 1 = " + str(len(unigrams)) + "\nngram 2 = " + str(len(bigrams)) + "\nngram 3 = " + str(len(trigrams)) + "\n")
+    f.write("\\data\\\nngram 1 = " + str(len(unigrams)) + "\nngram 2 = " + str(len(bigrams)) + "\nngram 3 = " + str(
+        len(trigrams)) + "\n")
 
     cardinality = len(unigrams)
     delta = 0
@@ -125,11 +119,13 @@ def create_ARPA_file(path_ARPA_file:Path, zerograms:int, unigrams:dict, bigrams:
     f.write("\n\\3-grams: \n")
     for trigram, freq in sorted(trigrams.items()):
         trigram_list = list(trigram.split(" "))
-        prob = math.log10(float(freq + delta) / (bigrams[(trigram_list[0] + " " + trigram_list[1])] + delta * cardinality))
+        prob = math.log10(
+            float(freq + delta) / (bigrams[(trigram_list[0] + " " + trigram_list[1])] + delta * cardinality))
         f.write(f"{prob} {trigram_list[0]} {trigram_list[1]} {trigram_list[2]}\n")
 
     f.write("\\end\\")
     f.close()
+
 
 if __name__ == "__main__":
     # Paths to files
@@ -141,7 +137,6 @@ if __name__ == "__main__":
     words_list = load_file(path_vocab_file)
     training_list_sentences = load_training_file(path_training_file)
 
-
     # Creating set of words
     words_set = set(words_list)
     words_set.add("<s>")
@@ -149,8 +144,8 @@ if __name__ == "__main__":
 
     # Preparing data
     training_list_final = get_words_train(training_list_sentences)
-    list_sentences_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
-    words_list = get_list_from_lists(list_sentences_words) # jeden dlouhy list obsahujici slova slovy
+    list_sentences_words = check_words_dictionary(training_list_final, words_set)  # zbaveni se preklepu
+    words_list = get_list_from_lists(list_sentences_words)  # jeden dlouhy list obsahujici slova slovy
 
     # Creating n-grams
     zerograms = count_words(words_list)
