@@ -1,14 +1,14 @@
 import math
 from pathlib import Path
 
-def load_file(filename:str):
+def load_file(filename:Path):
     with open(filename, 'r', encoding='cp1250') as file:
         words = file.read().splitlines()
     file.close()
 
     return words
 
-def load_training_file(filename:str):
+def load_training_file(filename:Path):
     words_lines = []
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
@@ -18,12 +18,6 @@ def load_training_file(filename:str):
     file.close()
 
     return words_lines # list listu (list vet), kde list = 1 veta
-
-def delete_new_lines(words:list):
-    words_pomocna = []
-    for word in words:
-        words_pomocna.append(word.strip('\n'))
-    return words_pomocna
 
 def create_training_set(training:list):
     words_set = set()
