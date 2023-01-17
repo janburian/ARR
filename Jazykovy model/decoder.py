@@ -1,7 +1,7 @@
 import math
+from pathlib import Path
 
-
-def load_vocab_file(filename: str):
+def load_vocab_file(filename:Path):
     '''
     Loads vocab file
     :param filename:
@@ -19,7 +19,7 @@ def load_vocab_file(filename: str):
 
     return list_final
 
-def load_leaves(filename: str):
+def load_leaves(filename:Path):
     '''
     Loads from leaves file (e. g. a prob prob; b prob prob)
     :param filename:
@@ -38,7 +38,7 @@ def load_leaves(filename: str):
 
     return dictionary
 
-def load_probabilities(filename: str):
+def load_observations(filename:Path):
     list_final = []
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
@@ -50,18 +50,19 @@ def load_probabilities(filename: str):
 
     return list_final
 
-def viterbi(probs: list, leaves: dict, mesh: dict):
+def viterbi(obs: list, leaves: dict, mesh: dict):
     prices_init = []
 
-    # Inicializace (radky = casy, sloupce = fonemy)
+    # obs: radky = casy, sloupce = fonemy
     N = len(leaves.keys())
-    T = len(probs)
+    T = len(obs)
 
-    for word in mesh:
+    # Inicializace (t == 0)
+    for word in mesh: # word = mnozina stavu
         values = []
         for char in word:
             idx = list(leaves.keys()).index(char)
-            list_stavu = probs[0] # beru pouze prvni radek
+            list_stavu = obs[0] # beru pouze prvni radek
             first_value = float(list_stavu[idx])
             log = -math.log10(first_value)
             values.append(log)
@@ -69,17 +70,17 @@ def viterbi(probs: list, leaves: dict, mesh: dict):
 
     print()
 
-    # Iterativni vypocet
+    # Iterativni vypocet (t >= 1)
     min = get_min(prices_init)
 
     prices_it = []
 
+    '''
     for word in mesh:
         for t in range(1, T):
             word = mesh[t]
-            N = len(word)
-
-            for j in range(0, N):
+            length_word = len(word)
+            for char in word:
                 first_char = word[j]
                 char_idx = list(leaves.keys()).index(first_char)
                 prices = prices_init[j]
@@ -97,30 +98,33 @@ def viterbi(probs: list, leaves: dict, mesh: dict):
                     value_2 = price_2[t] - math.log10(transitions[j])
 
                     res = min(value_1, value_2)
-
+    '''
 
 
 
 def get_min(prices_init):
-    minimum = math.inf
-    for probabilities in prices_init:
-        temp = min(probabilities)
-        if temp < minimum:
-            minimum = temp
-        continue
+    res = []
+    for list in prices_init:
+       last_element = list[-1]
+       res.append(last_element)
 
-    return minimum
+    return min(res)
 
 
 if __name__ == "__main__":
-    vocab_filename = "vocab"
-    leaves_filename = "leaves.txt"
-    probs_filename = "00170005_14.txt"
+    # Paths to files
+    path_vocab_file = Path('vocab')
+    path_leaves_file = Path('leaves.txt')
+    path_obs_file = Path('00170005_14.txt')
+    path_language_model_file = Path('') # TODO
 
-    mesh = load_vocab_file(vocab_filename)
-    probs = load_probabilities(probs_filename)
-    leaves_dict = load_leaves(leaves_filename)
-    viterbi(probs, leaves_dict, mesh)
+    # Loading files
+    mesh = load_vocab_file(path_vocab_file)
+    obs = load_observations(path_obs_file)
+    leaves_dict = load_leaves(path_leaves_file)
+
+    # Viterbi algorithm
+    viterbi(obs, leaves_dict, mesh)
     print()
 
 
