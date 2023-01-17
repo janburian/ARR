@@ -1,11 +1,12 @@
 import math
+from pathlib import Path
 
-# Nacteni souboru
 def load_file(filename:str):
     with open(filename, 'r', encoding='cp1250') as file:
-        lines = file.readlines()
+        words = file.read().splitlines()
     file.close()
-    return lines
+
+    return words
 
 def load_training_file(filename:str):
     words_lines = []
@@ -104,8 +105,8 @@ def count_words(words_list:list):
 
     return counter
 
-def create_ARPA_file(zerograms:int, unigrams:dict, bigrams:dict, trigrams:dict):
-    f = open("language_model.txt", "w", encoding="cp1250")
+def create_ARPA_file(path_ARPA_file:Path, zerograms:int, unigrams:dict, bigrams:dict, trigrams:dict):
+    f = open(path_ARPA_file, "w", encoding="cp1250")
     f.write("\\data\\\nngram 1 = " + str(len(unigrams)) + "\nngram 2 = " + str(len(bigrams)) + "\nngram 3 = " + str(len(trigrams)) + "\n")
 
     cardinality = len(unigrams)
@@ -132,28 +133,40 @@ def create_ARPA_file(zerograms:int, unigrams:dict, bigrams:dict, trigrams:dict):
     f.close()
 
 if __name__ == "__main__":
-    words_list = load_file('cestina.txt')
-    training_list = load_training_file('train.txt')
+    # Paths to files
+    path_vocab_file = Path('cestina')
+    path_training_file = Path('train.txt')
+    path_export_ARPA_file = Path(r'C:\Users\janbu\Desktop\language_model_arpa')
 
-    words_list_final = delete_new_lines(words_list)
-    words_set = set(words_list_final)
+    # Loading files
+    words_list = load_file(path_vocab_file)
+    training_list_sentences = load_training_file(path_training_file)
+
+
+    # Creating set of words
+    words_set = set(words_list)
     words_set.add("<s>")
     words_set.add("</s>")
 
-    training_list_final = get_words_train(training_list)
+    # Preparing data
+    training_list_final = get_words_train(training_list_sentences)
     list_sentences_words = check_words_dictionary(training_list_final, words_set) # zbaveni se preklepu
-    words_list = get_list_from_lists(list_sentences_words)
+    words_list = get_list_from_lists(list_sentences_words) # jeden dlouhy list obsahujici slova slovy
 
+    # Creating n-grams
     zerograms = count_words(words_list)
     unigrams = create_ngrams(list_sentences_words, 1)
     bigrams = create_ngrams(list_sentences_words, 2)
     trigrams = create_ngrams(list_sentences_words, 3)
 
+    # Creating dictionaries of n-grams
     unigrams_dictionary = create_dictionary(unigrams, 1)
     bigrams_dictionary = create_dictionary(bigrams, 2)
     trigrams_dictionary = create_dictionary(trigrams, 3)
 
+    # Trimming off trigrams with frequency = 1
     trimm_off_trigrams(trigrams_dictionary, 1)
 
-    create_ARPA_file(zerograms, unigrams_dictionary, bigrams_dictionary, trigrams_dictionary)
+    # Creating ARPA file
+    create_ARPA_file(path_export_ARPA_file, zerograms, unigrams_dictionary, bigrams_dictionary, trigrams_dictionary)
     print()
