@@ -60,7 +60,7 @@ def viterbi(obs: list, leaves: dict, mesh: dict):
     # Inicializace (t == 0)
     for word in mesh: # word = mnozina stavu
         values = []
-        for char in word:
+        for char in word: # stav = jeden char ve slove
             idx = list(leaves.keys()).index(char)
             list_stavu = obs[0] # beru pouze prvni radek
             first_value = float(list_stavu[idx])

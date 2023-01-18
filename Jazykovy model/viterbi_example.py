@@ -1,49 +1,64 @@
-states = ('Zdravá', 'Nemocná')
-
-observations = ('výborně', 'slabě', 'na umření')
-
-start_probability = {'Zdravá': 0.6, 'Nemocná': 0.4}
-
-transition_probability = {
-    'Zdravá': {'Zdravá': 0.7, 'Nemocná': 0.3},
-    'Nemocná': {'Zdravá': 0.4, 'Nemocná': 0.6},
+obs = ("normal", "cold", "dizzy")
+states = ("Healthy", "Fever")
+start_p = {"Healthy": 0.6, "Fever": 0.4}
+trans_p = {
+    "Healthy": {"Healthy": 0.7, "Fever": 0.3},
+    "Fever": {"Healthy": 0.4, "Fever": 0.6},
 }
-
-emission_probability = {
-    'Zdravá': {'výborně': 0.5, 'slabě': 0.4, 'na umření': 0.1},
-    'Nemocná': {'výborně': 0.1, 'slabě': 0.3, 'na umření': 0.6},
+emit_p = {
+    "Healthy": {"normal": 0.5, "cold": 0.4, "dizzy": 0.1},
+    "Fever": {"normal": 0.1, "cold": 0.3, "dizzy": 0.6},
 }
-
 
 def viterbi(obs, states, start_p, trans_p, emit_p):
     V = [{}]
-    path = {}
-
-    # Initialize base cases (t == 0)
-    for y in states:
-        V[0][y] = start_p[y] * emit_p[y][obs[0]]
-        path[y] = [y]
-
-    # Run Viterbi for t > 0
-    for t in range(1,len(obs)):
+    for st in states:
+        V[0] [st] = {"prob": start_p[st] * emit_p[st] [obs[0]], "prev": None}
+    # Run Viterbi when t > 0
+    for t in range(1, len(obs)):
         V.append({})
-        newpath = {}
+        for st in states:
+            max_tr_prob = V[t - 1] [states[0]] ["prob"] * trans_p[states[0]] [st] * emit_p[st] [obs[t]]
+            prev_st_selected = states[0]
+            for prev_st in states[1:]:
+                tr_prob = V[t - 1] [prev_st] ["prob"] * trans_p[prev_st] [st] * emit_p[st] [obs[t]]
+                if tr_prob > max_tr_prob:
+                    max_tr_prob = tr_prob
+                    prev_st_selected = prev_st
 
-        for y in states:
-            (prob, state) = max([(V[t-1][y0] * trans_p[y0][y] * emit_p[y][obs[t]], y0) for y0 in states])
-            V[t][y] = prob
-            newpath[y] = path[state] + [y]
+            max_prob = max_tr_prob
+            V[t] [st] = {"prob": max_prob, "prev": prev_st_selected}
 
-        # Don't need to remember the old paths
-        path = newpath
+    for line in dptable(V):
+        print(line)
 
-    (prob, state) = max([(V[len(obs) - 1][y], y) for y in states])
-    return (prob, path[state])
+    opt = []
+    max_prob = 0.0
+    best_st = None
+    # Get most probable state and its backtrack
+    for st, data in V[-1].items():
+        if data["prob"] > max_prob:
+            max_prob = data["prob"]
+            best_st = st
+    opt.append(best_st)
+    previous = best_st
 
-res = viterbi(observations,
-                   states,
-                   start_probability,
-                   transition_probability,
-                   emission_probability)
+    # Follow the backtrack till the first observation
+    for t in range(len(V) - 2, -1, -1):
+        opt.insert(0, V[t + 1] [previous] ["prev"])
+        previous = V[t + 1] [previous] ["prev"]
 
-print()
+    print ("The steps of states are " + " ".join(opt) + " with highest probability of %s" % max_prob)
+
+def dptable(V):
+    # Print a table of steps from dictionary
+    yield " " * 5 + "     ".join(("%3d" % i) for i in range(len(V)))
+    for state in V[0]:
+        yield "%.7s: " % state + " ".join("%.7s" % ("%lf" % v[state] ["prob"]) for v in V)
+
+
+viterbi(obs,
+        states,
+        start_p,
+        trans_p,
+        emit_p)
