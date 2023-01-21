@@ -162,4 +162,3 @@ if __name__ == "__main__":
 
     # Creating ARPA file
     create_ARPA_file(path_export_ARPA_file, zerograms, unigrams_dictionary, bigrams_dictionary, trigrams_dictionary)
-    print()
