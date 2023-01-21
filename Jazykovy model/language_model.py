@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     # Creating set of words
     words_set = set(words_list)
-    #words_set.add("<s>")
+    words_set.add("<s>")
     words_set.add("</s>")
 
     # Preparing data
