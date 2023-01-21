@@ -108,19 +108,19 @@ def create_ARPA_file(path_ARPA_file: Path, zerograms: int, unigrams: dict, bigra
     f.write("\n\\1-grams: \n")
     for unigram, freq in sorted(unigrams.items()):
         prob = math.log10(float(freq + delta) / (zerograms + delta * cardinality))
-        f.write("{:.8f}".format(prob) + " " + f"{unigram}\n")
+        f.write("{:.10f}".format(prob) + " " + f"{unigram}\n")
 
     f.write("\n\\2-grams: \n")
     for bigram, freq in sorted(bigrams.items()):
         bigram_list = list(bigram.split(" "))
         prob = math.log10(float(freq + delta) / (unigrams[(bigram_list[0])] + delta * cardinality))
-        f.write("{:.8f}".format(prob) + " " + f"{bigram_list[0]} {bigram_list[1]}\n")
+        f.write("{:.10f}".format(prob) + " " + f"{bigram_list[0]} {bigram_list[1]}\n")
 
     f.write("\n\\3-grams: \n")
     for trigram, freq in sorted(trigrams.items()):
         trigram_list = list(trigram.split(" "))
         prob = math.log10(float(freq + delta) / (bigrams[(trigram_list[0] + " " + trigram_list[1])] + delta * cardinality))
-        f.write("{:.8f}".format(prob) + " " + f"{trigram_list[0]} {trigram_list[1]} {trigram_list[2]}\n")
+        f.write("{:.10f}".format(prob) + " " + f"{trigram_list[0]} {trigram_list[1]} {trigram_list[2]}\n")
 
     f.write("\\end\\")
     f.close()
@@ -128,17 +128,17 @@ def create_ARPA_file(path_ARPA_file: Path, zerograms: int, unigrams: dict, bigra
 
 if __name__ == "__main__":
     # Paths to files
-    path_vocab_file = Path('cestina')
-    path_training_file = Path('train.txt')
-    path_export_ARPA_file = Path(r'C:\Users\janbu\Desktop\language_model_arpa')
+    path_vocab_file = Path(r'.\cestina')
+    path_training_file = Path(r'.\train.txt')
+    path_export_ARPA_file = Path(r'.\language_model_arpa')
 
-    # Loading files
+    # Reading files
     words_list = load_file(path_vocab_file)
     training_list_sentences = load_training_file(path_training_file)
 
     # Creating set of words
     words_set = set(words_list)
-    words_set.add("<s>")
+    #words_set.add("<s>")
     words_set.add("</s>")
 
     # Preparing data
