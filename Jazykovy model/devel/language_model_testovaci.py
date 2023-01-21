@@ -2,8 +2,8 @@ import math
 import time
 
 start = time.time()
-text_path = "./train.txt"
-dict_path = "./cestina"
+text_path = "../train.txt"
+dict_path = "../cestina"
 export_path = "lm_arpa.txt"
 
 LEGAL_WORDS = set()
