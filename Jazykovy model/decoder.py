@@ -2,6 +2,7 @@ import math
 from pathlib import Path
 import copy
 
+
 def load_vocab_file(filename: Path):
     list_final_phonemes = []
     list_words = []
@@ -18,11 +19,12 @@ def load_vocab_file(filename: Path):
             list_words.append(word)
     file.close()
     list_final_phonemes.append(["#"])
-    list_words.append("#") # silence not in vocab
+    list_words.append("#")  # silence not in vocab
 
     return [list_final_phonemes, list_words]
 
-def load_leaves(filename:Path):
+
+def load_leaves(filename: Path):
     '''
     Loads from leaves file (e. g. a prob prob; b prob prob)
     :param filename:
@@ -42,8 +44,8 @@ def load_leaves(filename:Path):
 
     return dictionary
 
+
 def load_language_model(filename: Path):
-    i = 0
     with open(filename, 'r', encoding='cp1250') as file:
         language_model_list = file.read().splitlines()
 
@@ -53,18 +55,17 @@ def load_language_model(filename: Path):
         for line in language_model_list:
             if line == "":
                 continue
-
             if line[0] == '\\':
                 current_list = []
                 sections[line] = current_list
-
             else:
                 current_list.append(line)
 
     return sections
 
+
 def get_language_model_dictionaries(sections: dict):
-    ngrams_dictionaries = {} # dictionary of dictionaries
+    ngrams_dictionaries = {}  # dictionary of dictionaries
     n = 1
     for section in sections:
         current_dict = {}
@@ -74,18 +75,17 @@ def get_language_model_dictionaries(sections: dict):
             for ngram in ngrams_list:
                 ngram_split = ngram.split()
                 prob = float(ngram_split[0])
-                key = " ".join(ngram_split[1:(n+1)])
-
+                key = " ".join(ngram_split[1:(n + 1)])
                 current_dict[key] = prob
 
-            section = section.replace(" ", "") # deleting whitespace in section
+            section = section.replace(" ", "")  # deleting whitespace in section
             ngrams_dictionaries[section] = current_dict
             n += 1
 
     return ngrams_dictionaries
 
 
-def load_observations(filename:Path):
+def load_observations(filename: Path):
     list_final = []
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
@@ -97,10 +97,9 @@ def load_observations(filename:Path):
 
     return list_final
 
-def get_minimal_price(phi_net, phonemes_net, words_list, unigrams, leaves_dict):
+
+def get_minimal_price(phi_net, phonemes_net, words_list, unigrams, leaves_dict, LGAMMA, BETA):
     ends = []
-    LGAMMA = -math.log10(0.01)
-    BETA = 5
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]
         phoneme = phonemes_net[i][-1]
@@ -113,6 +112,7 @@ def get_minimal_price(phi_net, phonemes_net, words_list, unigrams, leaves_dict):
     final_min_price = min(ends)
 
     return [final_min_price, ends]
+
 
 def get_spoken_words(final_min_price, ends: list, tokens: list, words_list: list):
     final_min_index = ends.index(final_min_price)
@@ -127,21 +127,20 @@ def get_spoken_words(final_min_price, ends: list, tokens: list, words_list: list
 
     return spoken_words
 
-def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict):
+
+def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, LGAMMA, BETA):
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
 
     # obs: radky = casy, sloupce = fonemy
-    N = len(leaves.keys())
-    T = len(obs)
 
     # Inicializace (t == 0)
     t = 0
     counter = 0
-    for phoneme_list in phi_net: # word = mnozina stavu  # stav = jeden char ve slove
+    for phoneme_list in phi_net:  # word = mnozina stavu  # stav = jeden char ve slove
         first_char = phoneme_list[t]
         idx = list(leaves.keys()).index(first_char)
-        obs_t1 = obs[t] # beru pouze prvni radek
+        obs_t1 = obs[t]  # beru pouze prvni radek
         first_value = obs_t1[idx]
         phi_net[counter][0] = first_value
         token_net[counter][0] = 0
@@ -154,14 +153,12 @@ def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigr
         counter += 1
 
     # Iterativni vypocet (t >= 1)
-    LGAMMA = -math.log10(0.01)
-    BETA = 5
-
     tokens = []
-    for t in range(1, len(obs)):
+    T = len(obs)
+    for t in range(1, T):
         ends = []
         for i in range(len(phonemes_net)):
-            phi = phi_net[i][-1] # price of word's end
+            phi = phi_net[i][-1]  # price of word's end
             end_phoneme = phonemes_net[i][-1]
             key = words_list[i]
             prob_language_model = unigrams.get(key, 0)
@@ -216,15 +213,6 @@ def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigr
     return [phi_net, token_net, tokens]
 
 
-def get_min(prices_init):
-    res = []
-    for list in prices_init:
-       last_element = list[-1]
-       res.append(last_element)
-
-    return min(res)
-
-
 if __name__ == "__main__":
     # Paths to files
     path_vocab_file = Path(r'.\vocab')
@@ -244,12 +232,15 @@ if __name__ == "__main__":
     # Extracting unigrams
     unigrams = language_model_dictionary["\\1-grams:"]
 
+    # Initializing parameters
+    LGAMMA = -math.log10(0.01)
+    BETA = 5
+
     # Viterbi algorithm
-    [phi_net, token_net, tokens] = viterbi(obs, leaves_dict, phonemes_net, words_list, unigrams)
-    [final_min_price, ends] = get_minimal_price(phi_net, phonemes_net, words_list, unigrams, leaves_dict)
+    [phi_net, token_net, tokens] = viterbi(obs, leaves_dict, phonemes_net, words_list, unigrams, LGAMMA, BETA)
+    [final_min_price, ends] = get_minimal_price(phi_net, phonemes_net, words_list, unigrams, leaves_dict, LGAMMA, BETA)
     spoken_words = get_spoken_words(final_min_price, ends, tokens, words_list)
 
     # Printing result
     print(f"Minimal price: {final_min_price}")
     print(f"Spoken words: {spoken_words}")
-
