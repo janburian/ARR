@@ -128,32 +128,19 @@ def get_spoken_words(final_min_price, ends: list, tokens: list, words_list: list
     return spoken_words
 
 
-def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, LGAMMA, BETA):
+def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, LGAMMA, BETA):
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
     # obs: radky = casy, sloupce = fonemy
 
     # Inicializace (t == 0)
-    counter = 0
-    for phoneme_list in phi_net:  # word = mnozina stavu  # stav = jeden char ve slove
-        viterbi_initialize(phi_net, token_net, counter, phoneme_list, leaves, obs)
-        counter += 1
+    for i in range(len(phi_net)):  # word = mnozina stavu  # stav = jeden char ve slove
+        viterbi_initialize(phi_net, token_net, i, leaves, observations)
 
     # Iterativni vypocet (t >= 1)
-    t = 0
     tokens = []
-    T = len(obs)
-    for t in range(1, T):
-        ends = []
-        for i in range(len(phonemes_net)):
-            phi = phi_net[i][-1]  # price of word's end
-            end_phoneme = phonemes_net[i][-1]
-            key = words_list[i]
-            prob_language_model = unigrams.get(key, 0)
-            trans_prob = leaves_dict[end_phoneme][1]
-
-            penalty = LGAMMA - BETA * prob_language_model
-            ends.append(phi + trans_prob + penalty)
+    for t in range(1, len(observations)):
+        ends = calculate_ends(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list)
 
         min_price_value = min(ends)
         min_price_index = ends.index(min_price_value)
@@ -176,15 +163,15 @@ def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigr
 
             idx = list(leaves.keys()).index(first_char)
 
-            phi_net[w][0] = price + obs[t][idx]
+            phi_net[w][0] = price + observations[t][idx]
             token_net[w][0] = token
             for j in range(1, len(word)):
-                prev_char = word[j-1]
+                prev_char = word[j - 1]
                 current_char = word[j]
 
-                prev_phi = last_phi[j-1] + leaves_dict[prev_char][1]
+                prev_phi = last_phi[j - 1] + leaves_dict[prev_char][1]
                 current_phi = last_phi[j] + leaves_dict[prev_char][0]
-                prev_token = last_token[j-1]
+                prev_token = last_token[j - 1]
                 current_token = last_token[j]
 
                 price = min(prev_phi, current_phi)
@@ -195,13 +182,28 @@ def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigr
                     token = current_token
 
                 current_char_idx = list(leaves.keys()).index(current_char)
-                phi_net[w][j] = price + obs[t][current_char_idx]
+                phi_net[w][j] = price + observations[t][current_char_idx]
                 token_net[w][j] = token
 
     return [phi_net, token_net, tokens]
 
 
-def viterbi_initialize(phi_net, token_net, index, phoneme_list, leaves, observations):
+def calculate_ends(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list):
+    ends = []
+    for i in range(len(phonemes_net)):
+        phi = phi_net[i][-1]  # price of word's end
+        end_phoneme = phonemes_net[i][-1]
+        key = words_list[i]
+        prob_language_model = unigrams.get(key, 0)
+        trans_prob = leaves_dict[end_phoneme][1]
+
+        penalty = LGAMMA - BETA * prob_language_model
+        ends.append(phi + trans_prob + penalty)
+    return ends
+
+
+def viterbi_initialize(phi_net, token_net, index, leaves, observations):
+    phoneme_list = phi_net[index]
     first_char = phoneme_list[0]
     idx = list(leaves.keys()).index(first_char)
     obs_t1 = observations[0]  # beru pouze prvni radek
