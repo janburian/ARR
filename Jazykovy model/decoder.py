@@ -131,7 +131,6 @@ def get_spoken_words(final_min_price, ends: list, tokens: list, words_list: list
 def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, LGAMMA, BETA):
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
-
     # obs: radky = casy, sloupce = fonemy
 
     # Inicializace (t == 0)
