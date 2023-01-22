@@ -134,24 +134,13 @@ def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigr
     # obs: radky = casy, sloupce = fonemy
 
     # Inicializace (t == 0)
-    t = 0
     counter = 0
     for phoneme_list in phi_net:  # word = mnozina stavu  # stav = jeden char ve slove
-        first_char = phoneme_list[t]
-        idx = list(leaves.keys()).index(first_char)
-        obs_t1 = obs[t]  # beru pouze prvni radek
-        first_value = obs_t1[idx]
-        phi_net[counter][0] = first_value
-        token_net[counter][0] = 0
-
-        if len(phoneme_list) > 1:
-            for i in range(1, len(phoneme_list)):
-                phi_net[counter][i] = math.inf
-                token_net[counter][i] = 0
-
+        viterbi_initialize(phi_net, token_net, counter, phoneme_list, leaves, obs)
         counter += 1
 
     # Iterativni vypocet (t >= 1)
+    t = 0
     tokens = []
     T = len(obs)
     for t in range(1, T):
@@ -210,6 +199,19 @@ def viterbi(obs: list, leaves: dict, phonemes_net: list, words_list: list, unigr
                 token_net[w][j] = token
 
     return [phi_net, token_net, tokens]
+
+
+def viterbi_initialize(phi_net, token_net, index, phoneme_list, leaves, observations):
+    first_char = phoneme_list[0]
+    idx = list(leaves.keys()).index(first_char)
+    obs_t1 = observations[0]  # beru pouze prvni radek
+    first_value = obs_t1[idx]
+    phi_net[index][0] = first_value
+    token_net[index][0] = 0
+    if len(phoneme_list) > 1:
+        for i in range(1, len(phoneme_list)):
+            phi_net[index][i] = math.inf
+            token_net[index][i] = 0
 
 
 if __name__ == "__main__":
