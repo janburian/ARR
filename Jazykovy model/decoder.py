@@ -132,7 +132,7 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
     # Recursion (t > 1)
     tokens_list = []
     for t in range(1, len(observations)):
-        prices_end_phonemes_penalties = calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams,
+        prices_end_phonemes_penalties = calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams, leaves_dict,
                                                                         beta, L_gamma)
 
         min_price_end_phoneme_value = min(prices_end_phonemes_penalties)
@@ -143,7 +143,7 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
         tokens_list.append(token_tuple)
         min_price_token = len(tokens_list) - 1
 
-        viterbi_iterative(leaves, min_price_end_phoneme_value, min_price_token, observations, phi_net, phonemes_net, t,
+        viterbi_recursive(leaves, min_price_end_phoneme_value, min_price_token, observations, phi_net, phonemes_net, t,
                           token_net)
 
     return [phi_net, token_net, tokens_list]
@@ -163,7 +163,7 @@ def viterbi_initialize(phi_net, token_net, index, leaves, observations):
             token_net[index][i] = 0
 
 
-def calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams, beta, L_gamma):
+def calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams, leaves_dict, beta, L_gamma):
     prices_ends_phonemes_penalties = []
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]  # price of word's end
@@ -178,22 +178,22 @@ def calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams,
     return prices_ends_phonemes_penalties
 
 
-def viterbi_iterative(leaves, min_price_end_value, min_price_token, observations, phi_net, phonemes_net, t, token_net):
+def viterbi_recursive(leaves, min_price_end_value, min_price_token, observations, phi_net, phonemes_net, t, token_net):
     for w in range(len(phi_net)):
         last_phi = phi_net[w].copy()
         last_token = token_net[w].copy()
 
         phonemes_list = phonemes_net[w]  # transcript of word in form of list of strings
 
-        viterbi_iterative_first_phoneme(last_phi, last_token, leaves, min_price_end_value, min_price_token,
+        viterbi_recursive_first_phoneme(last_phi, last_token, leaves, min_price_end_value, min_price_token,
                                         observations, phi_net, phonemes_list, t, token_net, w)
 
         for j in range(1, len(phonemes_list)):
-            viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observations, phi_net, phonemes_list, t,
+            viterbi_recursive_next_phonemes(j, last_phi, last_token, leaves, observations, phi_net, phonemes_list, t,
                                             token_net, w)
 
 
-def viterbi_iterative_first_phoneme(last_phi, last_token, leaves, min_price_end_value, min_price_token, observations,
+def viterbi_recursive_first_phoneme(last_phi, last_token, leaves, min_price_end_value, min_price_token, observations,
                                     phi_net, phonemes_list, t, token_net, w):
     first_phoneme = phonemes_list[0]
     prob = leaves_dict[first_phoneme][0]
@@ -207,7 +207,7 @@ def viterbi_iterative_first_phoneme(last_phi, last_token, leaves, min_price_end_
     token_net[w][0] = token
 
 
-def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observations, phi_net, phonemes_list, t, token_net,
+def viterbi_recursive_next_phonemes(j, last_phi, last_token, leaves, observations, phi_net, phonemes_list, t, token_net,
                                     w):
     previous_phoneme = phonemes_list[j - 1]
     current_phoneme = phonemes_list[j]
@@ -226,29 +226,20 @@ def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observation
 
 
 def count_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta, leaves_dict):
-    prices_ends_phonemes_penalties = []
-    for i in range(len(phonemes_net)):
-        phi = phi_net[i][-1]
-        phoneme = phonemes_net[i][-1]
-        word = words_list[i]
-        prob_language_model = unigrams.get(word, 0)
-        penalty = L_gamma - beta * prob_language_model
-        prob = leaves_dict[phoneme][1]
-        prices_ends_phonemes_penalties.append(phi + prob + penalty)
+    res = calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams, leaves_dict, beta, L_gamma)
+    final_min_price = min(res)
 
-    final_min_price = min(prices_ends_phonemes_penalties)
-
-    return [final_min_price, prices_ends_phonemes_penalties]
+    return [final_min_price, res]
 
 
 def get_spoken_words(final_min_price, prices_ends_phonemes_penalties: list, tokens_list: list, words_list: list):
     """
-    Gets the words, which were spoken
+    Returns list of the words, which were spoken
     :param final_min_price:
     :param prices_ends_phonemes_penalties:
     :param tokens_list:
     :param words_list:
-    :return: spoken words
+    :return: spoken words - list
     """
     final_min_index = prices_ends_phonemes_penalties.index(final_min_price)
     final_min_token = token_net[final_min_index][-1]
@@ -288,6 +279,8 @@ if __name__ == "__main__":
 
     # Viterbi algorithm
     [phi_net, token_net, tokens] = viterbi(observations, leaves_dict, phonemes_net, words_list, unigrams, L_gamma, beta)
+
+    # Counting result
     [final_min_price, prices_ends_phonemes_penalties] = count_minimal_price(phi_net, phonemes_net, words_list, unigrams,
                                                                             L_gamma, beta, leaves_dict)
     spoken_words = get_spoken_words(final_min_price, prices_ends_phonemes_penalties, tokens, words_list)
