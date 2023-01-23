@@ -2,12 +2,12 @@ import math
 from pathlib import Path
 
 
-def load_file(filename: Path):
+def load_vocab_file(filename: Path):
     with open(filename, 'r', encoding='cp1250') as file:
         words = file.read().splitlines()
     file.close()
 
-    return words
+    return set(words)
 
 
 def load_training_file(filename: Path):
@@ -133,21 +133,20 @@ if __name__ == "__main__":
     path_export_ARPA_file = Path(r'.\language_model_arpa')
 
     # Reading files
-    words_list = load_file(path_vocab_file)
+    words_set = load_vocab_file(path_vocab_file) # set of vocabulary words
     training_list_sentences = load_training_file(path_training_file)
 
-    # Creating set of words
-    words_set = set(words_list)
+    # Adding tags to set of words
     words_set.add("<s>")
     words_set.add("</s>")
 
     # Preparing data
     training_list_final = get_words_train(training_list_sentences)
     list_sentences_words = check_words_dictionary(training_list_final, words_set)  # zbaveni se preklepu
-    words_list = get_list_from_lists(list_sentences_words)  # jeden dlouhy list obsahujici slova slovy
+    words_set = get_list_from_lists(list_sentences_words)
 
     # Creating n-grams
-    zerograms = count_words(words_list)
+    zerograms = count_words(words_set)
     unigrams = create_ngrams(list_sentences_words, 1)
     bigrams = create_ngrams(list_sentences_words, 2)
     trigrams = create_ngrams(list_sentences_words, 3)
