@@ -145,49 +145,54 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
         min_price_end_value = min(prices_end_phonemes_penalties)
         min_price_end_index = prices_end_phonemes_penalties.index(min_price_end_value)
 
-        token_tuple = (words_list[min_price_end_index], token_net[min_price_end_index][-1])
+        token_tuple = (words_list[min_price_end_index], token_net[min_price_end_index][-1])  # eg. ('a', 3)
         tokens_list.append(token_tuple)
         min_price_token = len(tokens_list) - 1
 
-        for w in range(len(phi_net)):
-            last_phi = phi_net[w].copy()
-            last_token = token_net[w].copy()
-
-            phonemes_list = phonemes_net[w] # transcript of word
-            first_phoneme = phonemes_list[0]
-            prob = leaves_dict[first_phoneme][0]
-            price = min(min_price_end_value, last_phi[0] + prob)
-
-            if price == min_price_end_value:
-                token = min_price_token
-            else:
-                token = last_token[0]
-
-            idx = list(leaves.keys()).index(first_phoneme)
-
-            phi_net[w][0] = price + observations[t][idx]
-            token_net[w][0] = token
-            for j in range(1, len(phonemes_list)):
-                prev_char = phonemes_list[j - 1]
-                current_char = phonemes_list[j]
-
-                prev_phi = last_phi[j - 1] + leaves_dict[prev_char][1]
-                current_phi = last_phi[j] + leaves_dict[prev_char][0]
-                prev_token = last_token[j - 1]
-                current_token = last_token[j]
-
-                price = min(prev_phi, current_phi)
-
-                if price == prev_phi:
-                    token = prev_token
-                else:
-                    token = current_token
-
-                current_char_idx = list(leaves.keys()).index(current_char)
-                phi_net[w][j] = price + observations[t][current_char_idx]
-                token_net[w][j] = token
+        viterbi_iterative(leaves, min_price_end_value, min_price_token, observations, phi_net, phonemes_net, t,
+                          token_net)
 
     return [phi_net, token_net, tokens_list]
+
+
+def viterbi_iterative(leaves, min_price_end_value, min_price_token, observations, phi_net, phonemes_net, t, token_net):
+    for w in range(len(phi_net)):
+        last_phi = phi_net[w].copy()
+        last_token = token_net[w].copy()
+
+        phonemes_list = phonemes_net[w]  # transcript of word
+        first_phoneme = phonemes_list[0]
+        prob = leaves_dict[first_phoneme][0]
+        price = min(min_price_end_value, last_phi[0] + prob)
+
+        if price == min_price_end_value:
+            token = min_price_token
+        else:
+            token = last_token[0]
+
+        idx = list(leaves.keys()).index(first_phoneme)
+
+        phi_net[w][0] = price + observations[t][idx]
+        token_net[w][0] = token
+        for j in range(1, len(phonemes_list)):
+            prev_char = phonemes_list[j - 1]
+            current_char = phonemes_list[j]
+
+            prev_phi = last_phi[j - 1] + leaves_dict[prev_char][1]
+            current_phi = last_phi[j] + leaves_dict[prev_char][0]
+            prev_token = last_token[j - 1]
+            current_token = last_token[j]
+
+            price = min(prev_phi, current_phi)
+
+            if price == prev_phi:
+                token = prev_token
+            else:
+                token = current_token
+
+            current_char_idx = list(leaves.keys()).index(current_char)
+            phi_net[w][j] = price + observations[t][current_char_idx]
+            token_net[w][j] = token
 
 
 def calculate_prices_end_penalties(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list):
