@@ -218,18 +218,18 @@ def get_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta
     return [final_min_price, prices_ends_phonemes_penalties]
 
 
-def get_spoken_words(final_min_price, prices_ends_phonemes_penalties: list, tokens: list, words_list: list):
+def get_spoken_words(final_min_price, prices_ends_phonemes_penalties: list, tokens_list: list, words_list: list):
     final_min_index = prices_ends_phonemes_penalties.index(final_min_price)
     final_min_token = token_net[final_min_index][-1]
 
     previous_token_index = final_min_token
-    spoken_words = [words_list[final_min_index]]
-    while (previous_token_index != 0):
-        spoken_words.append(tokens[previous_token_index][0])
-        previous_token_index = tokens[previous_token_index][1]
-    spoken_words.reverse()
+    spoken_words_list = [words_list[final_min_index]]
+    while previous_token_index != 0:
+        spoken_words_list.append(tokens_list[previous_token_index][0])
+        previous_token_index = tokens_list[previous_token_index][1]
+    spoken_words_list.reverse()
 
-    return spoken_words
+    return spoken_words_list
 
 
 if __name__ == "__main__":
