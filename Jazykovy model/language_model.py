@@ -19,7 +19,7 @@ def load_training_file(filename: Path):
             words_lines.append(sentence)
     file.close()
 
-    return words_lines  # list listu (list vet), kde list = 1 veta
+    return words_lines  # list of lists (list of sentences) where list = 1 sentence
 
 
 def create_ngrams(list_words_in_sentences: list, n: int):
@@ -37,14 +37,14 @@ def create_dictionary(ngrams_sentences: list, n: int):
     dictionary = {}
     for ngram_sentence in ngrams_sentences:
         for ngram in ngram_sentence:
-            if len(ngram) == n:  # smazani kratsich ngramu
+            if len(ngram) == n:  # skipping shorter ngrams if any
                 key = " ".join(ngram)
                 if key not in dictionary:
                     dictionary[key] = 1
                 else:
                     dictionary[key] += 1
 
-    return dictionary
+    return dictionary # dictionary with ngrams frequencies
 
 
 def get_words_train(train_sentences: list):
@@ -53,7 +53,7 @@ def get_words_train(train_sentences: list):
         words = sentence.split(" ")
         words_list.append(words)
 
-    return words_list  # list listu slov jednotlivych vet
+    return words_list  # list of lists of words of particular sentences
 
 
 def get_list_from_lists(list_of_lists: list):
@@ -133,23 +133,23 @@ if __name__ == "__main__":
     path_export_ARPA_file = Path(r'.\language_model_arpa')
 
     # Reading files
-    words_set = load_vocab_file(path_vocab_file) # set of vocabulary words
+    vocab_words_set = load_vocab_file(path_vocab_file) # set of vocabulary words
     training_list_sentences = load_training_file(path_training_file)
 
-    # Adding tags to set of words
-    words_set.add("<s>")
-    words_set.add("</s>")
+    # Adding start and end tags to set of words
+    vocab_words_set.add("<s>")
+    vocab_words_set.add("</s>")
 
     # Preparing data
-    training_list_final = get_words_train(training_list_sentences)
-    list_sentences_words = check_words_dictionary(training_list_final, words_set)  # zbaveni se preklepu
-    words_set = get_list_from_lists(list_sentences_words)
+    list_sentences_words = get_words_train(training_list_sentences)
+    list_sentences_words_with_unk_words = check_words_dictionary(list_sentences_words, vocab_words_set)  # words which are not in vocab => <unk>
+    training_words_list = get_list_from_lists(list_sentences_words_with_unk_words)
 
     # Creating n-grams
-    zerograms = count_words(words_set)
-    unigrams = create_ngrams(list_sentences_words, 1)
-    bigrams = create_ngrams(list_sentences_words, 2)
-    trigrams = create_ngrams(list_sentences_words, 3)
+    zerograms = count_words(training_words_list)
+    unigrams = create_ngrams(list_sentences_words_with_unk_words, 1)
+    bigrams = create_ngrams(list_sentences_words_with_unk_words, 2)
+    trigrams = create_ngrams(list_sentences_words_with_unk_words, 3)
 
     # Creating dictionaries of n-grams
     unigrams_dictionary = create_dictionary(unigrams, 1)
