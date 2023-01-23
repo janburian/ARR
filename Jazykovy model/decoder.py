@@ -124,17 +124,16 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
             beta: int):
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
-    # observations: lines = times; columns = phonemes
 
-    # Initialization (t = 0)
-    for i in range(len(phi_net)):  # word = mnozina stavu  # stav = jeden char ve slove
+    # Initialization (t = 1)
+    for i in range(len(phi_net)):  # state = 1 phonem in word
         viterbi_initialize(phi_net, token_net, i, leaves, observations)
 
-    # Recursion (t >= 1)
+    # Recursion (t > 1)
     tokens_list = []
     for t in range(1, len(observations)):
-        prices_end_phonemes_penalties = calculate_prices_end_penalties(beta, L_gamma, phi_net, phonemes_net, unigrams,
-                                                                       words_list)
+        prices_end_phonemes_penalties = calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams,
+                                                                        beta, L_gamma)
 
         min_price_end_phoneme_value = min(prices_end_phonemes_penalties)
         min_price_end_phoneme_index = prices_end_phonemes_penalties.index(min_price_end_phoneme_value)
@@ -154,7 +153,7 @@ def viterbi_initialize(phi_net, token_net, index, leaves, observations):
     phoneme_list = phi_net[index]
     first_phoneme = phoneme_list[0]
     idx = list(leaves.keys()).index(first_phoneme)
-    obs_t1 = observations[0]  # beru pouze prvni radek
+    obs_t1 = observations[0]  # only first line (t = 1)
     first_value = obs_t1[idx]
     phi_net[index][0] = first_value
     token_net[index][0] = 0
@@ -164,7 +163,7 @@ def viterbi_initialize(phi_net, token_net, index, leaves, observations):
             token_net[index][i] = 0
 
 
-def calculate_prices_end_penalties(beta, L_gamma, phi_net, phonemes_net, unigrams, words_list):
+def calculate_ends_prices_penalties(phonemes_net, phi_net, words_list, unigrams, beta, L_gamma):
     prices_ends_phonemes_penalties = []
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]  # price of word's end
@@ -184,7 +183,7 @@ def viterbi_iterative(leaves, min_price_end_value, min_price_token, observations
         last_phi = phi_net[w].copy()
         last_token = token_net[w].copy()
 
-        phonemes_list = phonemes_net[w]  # transcript of word in form of list of Strings
+        phonemes_list = phonemes_net[w]  # transcript of word in form of list of strings
 
         viterbi_iterative_first_phoneme(last_phi, last_token, leaves, min_price_end_value, min_price_token,
                                         observations, phi_net, phonemes_list, t, token_net, w)
@@ -213,7 +212,7 @@ def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observation
     previous_phoneme = phonemes_list[j - 1]
     current_phoneme = phonemes_list[j]
     previous_phi = last_phi[j - 1] + leaves_dict[previous_phoneme][1]  # previous + transition probability
-    current_phi = last_phi[j] + leaves_dict[previous_phoneme][0]  # current + loop probability 
+    current_phi = last_phi[j] + leaves_dict[previous_phoneme][0]  # current + loop probability
     previous_token = last_token[j - 1]
     current_token = last_token[j]
     price = min(previous_phi, current_phi)
@@ -273,7 +272,7 @@ if __name__ == "__main__":
 
     # Reading files
     [phonemes_net, words_list] = load_vocab_file(path_vocab_file)
-    obs = load_observations(path_obs_file)
+    observations = load_observations(path_obs_file)
     leaves_dict = load_leaves(path_leaves_file)
 
     # Formatting language model
@@ -288,7 +287,7 @@ if __name__ == "__main__":
     beta = 5
 
     # Viterbi algorithm
-    [phi_net, token_net, tokens] = viterbi(obs, leaves_dict, phonemes_net, words_list, unigrams, L_gamma, beta)
+    [phi_net, token_net, tokens] = viterbi(observations, leaves_dict, phonemes_net, words_list, unigrams, L_gamma, beta)
     [final_min_price, prices_ends_phonemes_penalties] = count_minimal_price(phi_net, phonemes_net, words_list, unigrams,
                                                                             L_gamma, beta, leaves_dict)
     spoken_words = get_spoken_words(final_min_price, prices_ends_phonemes_penalties, tokens, words_list)

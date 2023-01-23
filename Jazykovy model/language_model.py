@@ -1,7 +1,9 @@
+# Modules import# Modules import
 import math
 from pathlib import Path
 
 
+# Methods
 def load_vocab_file(filename: Path):
     with open(filename, 'r', encoding='cp1250') as file:
         words = file.read().splitlines()
