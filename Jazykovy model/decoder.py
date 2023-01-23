@@ -131,43 +131,45 @@ def get_spoken_words(final_min_price, ends: list, tokens: list, words_list: list
 def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, LGAMMA, BETA):
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
-    # obs: radky = casy, sloupce = fonemy
+    # observations: radky = casy, sloupce = fonemy
 
     # Inicializace (t == 0)
     for i in range(len(phi_net)):  # word = mnozina stavu  # stav = jeden char ve slove
         viterbi_initialize(phi_net, token_net, i, leaves, observations)
 
     # Iterativni vypocet (t >= 1)
-    tokens = []
+    tokens_list = []
     for t in range(1, len(observations)):
-        ends = calculate_ends(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list)
+        prices_end_phonemes_penalties = calculate_prices_end_penalties(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list)
 
-        min_price_value = min(ends)
-        min_price_index = ends.index(min_price_value)
-        tokens.append((words_list[min_price_index], token_net[min_price_index][-1]))
-        min_price_token = len(tokens) - 1
+        min_price_end_value = min(prices_end_phonemes_penalties)
+        min_price_end_index = prices_end_phonemes_penalties.index(min_price_end_value)
+
+        token_tuple = (words_list[min_price_end_index], token_net[min_price_end_index][-1])
+        tokens_list.append(token_tuple)
+        min_price_token = len(tokens_list) - 1
 
         for w in range(len(phi_net)):
             last_phi = phi_net[w].copy()
             last_token = token_net[w].copy()
 
-            word = phonemes_net[w]
-            first_char = word[0]
-            prob = leaves_dict[first_char][0]
-            price = min(min_price_value, last_phi[0] + prob)
+            phonemes_list = phonemes_net[w] # transcript of word
+            first_phoneme = phonemes_list[0]
+            prob = leaves_dict[first_phoneme][0]
+            price = min(min_price_end_value, last_phi[0] + prob)
 
-            if price == min_price_value:
+            if price == min_price_end_value:
                 token = min_price_token
             else:
                 token = last_token[0]
 
-            idx = list(leaves.keys()).index(first_char)
+            idx = list(leaves.keys()).index(first_phoneme)
 
             phi_net[w][0] = price + observations[t][idx]
             token_net[w][0] = token
-            for j in range(1, len(word)):
-                prev_char = word[j - 1]
-                current_char = word[j]
+            for j in range(1, len(phonemes_list)):
+                prev_char = phonemes_list[j - 1]
+                current_char = phonemes_list[j]
 
                 prev_phi = last_phi[j - 1] + leaves_dict[prev_char][1]
                 current_phi = last_phi[j] + leaves_dict[prev_char][0]
@@ -185,21 +187,22 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
                 phi_net[w][j] = price + observations[t][current_char_idx]
                 token_net[w][j] = token
 
-    return [phi_net, token_net, tokens]
+    return [phi_net, token_net, tokens_list]
 
 
-def calculate_ends(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list):
-    ends = []
+def calculate_prices_end_penalties(BETA, LGAMMA, phi_net, phonemes_net, unigrams, words_list):
+    prices_ends_phonemes = []
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]  # price of word's end
         end_phoneme = phonemes_net[i][-1]
-        key = words_list[i]
-        prob_language_model = unigrams.get(key, 0)
+        word = words_list[i] # key to dictionary
+        prob_language_model = unigrams.get(word, 0)
         trans_prob = leaves_dict[end_phoneme][1]
 
-        penalty = LGAMMA - BETA * prob_language_model
-        ends.append(phi + trans_prob + penalty)
-    return ends
+        penalty = - BETA * prob_language_model + LGAMMA
+        prices_ends_phonemes.append(phi + trans_prob + penalty) # -log p(O|W) - BETA log p(W) - LGAMMA
+
+    return prices_ends_phonemes
 
 
 def viterbi_initialize(phi_net, token_net, index, leaves, observations):
