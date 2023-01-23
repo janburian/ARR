@@ -3,8 +3,14 @@ import math
 from pathlib import Path
 import copy
 
+
 # Methods
 def load_vocab_file(filename: Path):
+    """
+    Reads vocabulary file
+    :param filename:
+    :return: [list of lists of phonemes, list of words] eg. [[['a'], ['a', 'b', 'i'], ...], ['a', 'aby']]
+    """
     list_final_phonemes = []
     list_words = []
 
@@ -26,6 +32,11 @@ def load_vocab_file(filename: Path):
 
 
 def load_observations(filename: Path):
+    """
+    Reads observations
+    :param filename:
+    :return: list of lists
+    """
     list_final = []
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
@@ -39,11 +50,11 @@ def load_observations(filename: Path):
 
 
 def load_leaves(filename: Path):
-    '''
-    Loads from leaves file (e. g. a prob prob; b prob prob)
+    """
+    Reads leaves file (e. g. a prob prob; b prob prob)
     :param filename:
-    :return:
-    '''
+    :return: dictionary {'a' = [prob, prob], 'b' = [prob, prob], ...}
+    """
     dictionary = {}
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
@@ -60,6 +71,11 @@ def load_leaves(filename: Path):
 
 
 def load_language_model(filename: Path):
+    """
+    Reads language model
+    :param filename:
+    :return: dictionary
+    """
     with open(filename, 'r', encoding='cp1250') as file:
         language_model_list = file.read().splitlines()
 
@@ -78,7 +94,12 @@ def load_language_model(filename: Path):
     return sections
 
 
-def get_language_model_dictionaries(sections: dict):
+def create_language_model_dictionaries(sections: dict):
+    """
+    Creates certain n-gram dictionaries
+    :param sections:
+    :return: dictionary of n-gram dictionaries
+    """
     ngrams_dictionaries = {}  # dictionary of dictionaries
     n = 1
     for section in sections:
@@ -99,7 +120,8 @@ def get_language_model_dictionaries(sections: dict):
     return ngrams_dictionaries
 
 
-def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, L_gamma: float, beta: int):
+def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: list, unigrams: dict, L_gamma: float,
+            beta: int):
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
     # observations: lines = times; columns = phonemes
@@ -117,7 +139,8 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
         min_price_end_phoneme_value = min(prices_end_phonemes_penalties)
         min_price_end_phoneme_index = prices_end_phonemes_penalties.index(min_price_end_phoneme_value)
 
-        token_tuple = (words_list[min_price_end_phoneme_index], token_net[min_price_end_phoneme_index][-1])  # eg. ('a', 3)
+        token_tuple = (
+        words_list[min_price_end_phoneme_index], token_net[min_price_end_phoneme_index][-1])  # eg. ('a', 3)
         tokens_list.append(token_tuple)
         min_price_token = len(tokens_list) - 1
 
@@ -146,7 +169,7 @@ def calculate_prices_end_penalties(beta, L_gamma, phi_net, phonemes_net, unigram
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]  # price of word's end
         end_phoneme = phonemes_net[i][-1]
-        word = words_list[i] # key to dictionary
+        word = words_list[i]  # key to dictionary
         prob_language_model = unigrams.get(word, 0)
         trans_prob = leaves_dict[end_phoneme][1]
 
@@ -154,6 +177,7 @@ def calculate_prices_end_penalties(beta, L_gamma, phi_net, phonemes_net, unigram
         prices_ends_phonemes_penalties.append(phi + trans_prob + penalty)  # -log p(O|W) - beta * log p(W) - L_gamma
 
     return prices_ends_phonemes_penalties
+
 
 def viterbi_iterative(leaves, min_price_end_value, min_price_token, observations, phi_net, phonemes_net, t, token_net):
     for w in range(len(phi_net)):
@@ -188,8 +212,8 @@ def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observation
                                     w):
     previous_phoneme = phonemes_list[j - 1]
     current_phoneme = phonemes_list[j]
-    previous_phi = last_phi[j - 1] + leaves_dict[previous_phoneme][1]
-    current_phi = last_phi[j] + leaves_dict[previous_phoneme][0]
+    previous_phi = last_phi[j - 1] + leaves_dict[previous_phoneme][1]  # previous + transition probability
+    current_phi = last_phi[j] + leaves_dict[previous_phoneme][0]  # current + loop probability 
     previous_token = last_token[j - 1]
     current_token = last_token[j]
     price = min(previous_phi, current_phi)
@@ -202,7 +226,7 @@ def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observation
     token_net[w][j] = token
 
 
-def get_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta, leaves_dict):
+def count_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta, leaves_dict):
     prices_ends_phonemes_penalties = []
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]
@@ -219,6 +243,14 @@ def get_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta
 
 
 def get_spoken_words(final_min_price, prices_ends_phonemes_penalties: list, tokens_list: list, words_list: list):
+    """
+    Gets the words, which were spoken
+    :param final_min_price:
+    :param prices_ends_phonemes_penalties:
+    :param tokens_list:
+    :param words_list:
+    :return: spoken words
+    """
     final_min_index = prices_ends_phonemes_penalties.index(final_min_price)
     final_min_token = token_net[final_min_index][-1]
 
@@ -246,7 +278,7 @@ if __name__ == "__main__":
 
     # Formatting language model
     language_model_sections = load_language_model(path_language_model_file)
-    language_model_dictionary = get_language_model_dictionaries(language_model_sections)
+    language_model_dictionary = create_language_model_dictionaries(language_model_sections)
 
     # Extracting unigrams
     unigrams = language_model_dictionary["\\1-grams:"]
@@ -257,7 +289,8 @@ if __name__ == "__main__":
 
     # Viterbi algorithm
     [phi_net, token_net, tokens] = viterbi(obs, leaves_dict, phonemes_net, words_list, unigrams, L_gamma, beta)
-    [final_min_price, prices_ends_phonemes_penalties] = get_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta, leaves_dict)
+    [final_min_price, prices_ends_phonemes_penalties] = count_minimal_price(phi_net, phonemes_net, words_list, unigrams,
+                                                                            L_gamma, beta, leaves_dict)
     spoken_words = get_spoken_words(final_min_price, prices_ends_phonemes_penalties, tokens, words_list)
 
     # Printing result
