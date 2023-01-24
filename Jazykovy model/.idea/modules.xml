@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/../Language model/.idea/Jazykovy model.iml" filepath="$PROJECT_DIR$/../Language model/.idea/Jazykovy model.iml" />
+=======
+      <module fileurl="file://$PROJECT_DIR$/.idea/Jazykovy model.iml" filepath="$PROJECT_DIR$/.idea/Jazykovy model.iml" />
+>>>>>>> parent of 2fa6998 (Renamed directory)
     </modules>
   </component>
 </project>
