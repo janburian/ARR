@@ -53,21 +53,25 @@ def load_leaves(filename: Path):
     """
     Reads leaves file (e. g. a prob prob; b prob prob)
     :param filename:
-    :return: dictionary {'a' = [prob, prob], 'b' = [prob, prob], ...}
+    :return: dictionary_phonemes {'a' = [prob, prob], 'b' = [prob, prob], ...}
     """
-    dictionary = {}
+    dictionary_phonemes = {}
+    list_probs = []
+    index = 0
     with open(filename, 'r', encoding='cp1250') as file:
         for line in file:
             line_final = (line.rstrip("\n")).split()
 
-            char = line_final[0]
+            phoneme = line_final[0]
             probabilities_list_str = line_final[1:]
-            probabilities_list_float = [-math.log10(float(i)) for i in probabilities_list_str]
+            probabilities_tuple_float = (-math.log10(float(i)) for i in probabilities_list_str)
 
-            dictionary[char] = probabilities_list_float
+            dictionary_phonemes[phoneme] = index
+            list_probs.append(probabilities_tuple_float)
+            index += 1
     file.close()
 
-    return dictionary
+    return [dictionary_phonemes, list_probs]
 
 
 def load_language_model(filename: Path):
@@ -270,7 +274,7 @@ if __name__ == "__main__":
     # Reading files
     [phonemes_net, words_list] = load_vocab_file(path_vocab_file)
     observations = load_observations(path_obs_file)
-    leaves_dict = load_leaves(path_leaves_file)
+    [phonemes_dict, list_probs] = load_leaves(path_leaves_file)
 
     # Formatting language model
     language_model_sections = load_language_model(path_language_model_file)
