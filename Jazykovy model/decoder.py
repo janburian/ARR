@@ -138,8 +138,10 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
         min_price_end_phoneme_value = min(prices_end_phonemes)
         min_price_end_phoneme_index = prices_end_phonemes.index(min_price_end_phoneme_value)
 
-        token_tuple = (
-        words_list[min_price_end_phoneme_index], token_net[min_price_end_phoneme_index][-1])  # eg. ('a', 3)
+        token_word = words_list[min_price_end_phoneme_index]
+        token_pointer = token_net[min_price_end_phoneme_index][-1]
+
+        token_tuple = (token_word, token_pointer)  # eg. ('word', 3)
         tokens_tuples_list.append(token_tuple)
         min_price_token = len(tokens_tuples_list) - 1
 
