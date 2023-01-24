@@ -130,7 +130,7 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
         viterbi_initialize(phi_net, token_net, i, leaves, observations)
 
     # Iterative (t > 1)
-    tokens_list = []
+    tokens_tuples_list = []
     for t in range(1, len(observations)):
         prices_end_phonemes = calculate_end_states_prices(phonemes_net, phi_net, words_list, unigrams,
                                                           leaves_dict, beta, L_gamma)
@@ -140,13 +140,13 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
 
         token_tuple = (
         words_list[min_price_end_phoneme_index], token_net[min_price_end_phoneme_index][-1])  # eg. ('a', 3)
-        tokens_list.append(token_tuple)
-        min_price_token = len(tokens_list) - 1
+        tokens_tuples_list.append(token_tuple)
+        min_price_token = len(tokens_tuples_list) - 1
 
         viterbi_iterative(leaves, min_price_end_phoneme_value, min_price_token, observations, phi_net, phonemes_net, t,
                           token_net)
 
-    return [phi_net, token_net, tokens_list]
+    return [phi_net, token_net, tokens_tuples_list]
 
 
 def viterbi_initialize(phi_net: list, token_net: list, index: int, leaves: dict, observations: list):
@@ -232,12 +232,12 @@ def count_minimal_price(phi_net: list, phonemes_net: list, words_list: list, uni
     return [final_min_price, res]
 
 
-def get_spoken_words(final_min_price, prices_ends_phonemes: list, tokens_list: list, words_list: list):
+def get_spoken_words(final_min_price, prices_ends_phonemes: list, tokens_tuples_list: list, words_list: list):
     """
     Returns list of the words, which were spoken
     :param final_min_price:
     :param prices_ends_phonemes:
-    :param tokens_list:
+    :param tokens_tuples_list:
     :param words_list:
     :return: spoken words - list
     """
@@ -250,7 +250,7 @@ def get_spoken_words(final_min_price, prices_ends_phonemes: list, tokens_list: l
     last_word = words_list[final_min_index]
     spoken_words_list.append(last_word)
     while previous_token_index != 0:
-        token_tuple = tokens_list[previous_token_index]
+        token_tuple = tokens_tuples_list[previous_token_index]
         spoken_words_list.append(token_tuple[0])  # spoken word
         previous_token_index = token_tuple[1]  # previous token index
     spoken_words_list.reverse()
@@ -277,17 +277,17 @@ if __name__ == "__main__":
     # Extracting unigrams
     unigrams = language_model_dictionary["\\1-grams:"]
 
-    # Initializing parameters
+    # Initializing penalty parameters
     L_gamma = -math.log10(0.05)
     beta = 5
 
     # Viterbi algorithm
-    [phi_net, token_net, tokens] = viterbi(observations, leaves_dict, phonemes_net, words_list, unigrams, L_gamma, beta)
+    [phi_net, token_net, tokens_tuples_list] = viterbi(observations, leaves_dict, phonemes_net, words_list, unigrams, L_gamma, beta)
 
     # Counting result
     [final_min_price, prices_ends_phonemes] = count_minimal_price(phi_net, phonemes_net, words_list, unigrams,
                                                                   L_gamma, beta, leaves_dict)
-    spoken_words = get_spoken_words(final_min_price, prices_ends_phonemes, tokens, words_list)
+    spoken_words = get_spoken_words(final_min_price, prices_ends_phonemes, tokens_tuples_list, words_list)
 
     # Printing result
     print(f"Minimal price: {final_min_price}")
