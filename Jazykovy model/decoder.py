@@ -125,11 +125,11 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
     phi_net = copy.deepcopy(phonemes_net)
     token_net = copy.deepcopy(phonemes_net)
 
-    # Initialization (t = 1)
+    # Initialize (t = 1)
     for i in range(len(phi_net)):  # state = 1 phonem in word
         viterbi_initialize(phi_net, token_net, i, leaves, observations)
 
-    # Recursion (t > 1)
+    # Iterative (t > 1)
     tokens_list = []
     for t in range(1, len(observations)):
         prices_end_phonemes = calculate_end_states_prices(phonemes_net, phi_net, words_list, unigrams,
