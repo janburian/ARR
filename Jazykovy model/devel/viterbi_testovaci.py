@@ -2,10 +2,10 @@ import copy
 import numpy as np
 import re
 
-LEAVES_PATH = "leaves.txt"
-VOCAB_PATH = "vocab"
+LEAVES_PATH = "../leaves.txt"
+VOCAB_PATH = "../vocab"
 ARPA_PATH = "./lm_arpa.txt"
-OBSERVATIONS_PATH = "00170005_14.txt"
+OBSERVATIONS_PATH = "../00170005_14.txt"
 
 LEAVES_ENCODING = "windows-1250"
 VOCAB_ENCODING = "windows-1250"
