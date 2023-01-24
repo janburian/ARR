@@ -250,11 +250,13 @@ def get_spoken_words(final_min_price, prices_ends_phonemes: list, tokens_list: l
     last_word = words_list[final_min_index]
     spoken_words_list.append(last_word)
     while previous_token_index != 0:
-        spoken_words_list.append(tokens_list[previous_token_index][0])
-        previous_token_index = tokens_list[previous_token_index][1]
+        token_tuple = tokens_list[previous_token_index]
+        spoken_words_list.append(token_tuple[0])  # spoken word
+        previous_token_index = token_tuple[1]  # previous token index
     spoken_words_list.reverse()
 
     return spoken_words_list
+
 
 if __name__ == "__main__":
     # Paths to files
