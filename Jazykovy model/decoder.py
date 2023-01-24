@@ -53,7 +53,8 @@ def load_leaves(filename: Path):
     """
     Reads leaves file (e. g. a prob prob; b prob prob)
     :param filename:
-    :return: dictionary_phonemes {'a' = [prob, prob], 'b' = [prob, prob], ...}
+    :return: dictionary_phonemes {'a' = 14, 'b' = 15, ...}; key = phoneme, value = index
+    :return: list_probs [(prob, prob), (prob, prob), ...]
     """
     dictionary_phonemes = {}
     list_probs = []
@@ -291,9 +292,9 @@ if __name__ == "__main__":
     # Extracting unigrams
     unigrams = language_model_dictionary["\\1-grams:"]
 
-    # Initializing penalty parameters
-    L_gamma = -math.log10(0.01)
-    beta = 5
+    # Initializing penalty parameters (language model)
+    L_gamma = -math.log10(0.01)  # 0
+    beta = 5  # 0
 
     # Viterbi algorithm
     [phi_net, token_net, tokens_tuples_list] = viterbi(observations, phonemes_dict, probs_list, phonemes_net, words_list,
