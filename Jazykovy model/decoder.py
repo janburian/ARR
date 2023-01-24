@@ -157,10 +157,10 @@ def viterbi_initialize(phi_net, token_net, index, leaves, observations):
     first_value = obs_t1[idx]
     phi_net[index][0] = first_value
     token_net[index][0] = 0
-    if len(phoneme_list) > 1:
-        for i in range(1, len(phoneme_list)):
-            phi_net[index][i] = math.inf
-            token_net[index][i] = 0
+
+    for i in range(1, len(phoneme_list)):  # if len(phoneme_list) > 1
+        phi_net[index][i] = math.inf
+        token_net[index][i] = 0
 
 
 def calculate_end_states_prices(phonemes_net, phi_net, words_list, unigrams, leaves_dict, beta, L_gamma):
