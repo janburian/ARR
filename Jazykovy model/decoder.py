@@ -149,7 +149,7 @@ def viterbi(observations: list, leaves: dict, phonemes_net: list, words_list: li
     return [phi_net, token_net, tokens_list]
 
 
-def viterbi_initialize(phi_net, token_net, index, leaves, observations):
+def viterbi_initialize(phi_net: list, token_net: list, index: int, leaves: dict, observations: list):
     phoneme_list = phi_net[index]
     first_phoneme = phoneme_list[0]
     idx = list(leaves.keys()).index(first_phoneme)
@@ -163,7 +163,7 @@ def viterbi_initialize(phi_net, token_net, index, leaves, observations):
         token_net[index][i] = 0
 
 
-def calculate_end_states_prices(phonemes_net, phi_net, words_list, unigrams, leaves_dict, beta, L_gamma):
+def calculate_end_states_prices(phonemes_net: list, phi_net: list, words_list: list, unigrams: dict, leaves_dict: dict, beta, L_gamma):
     prices_ends_phonemes = []
     for i in range(len(phonemes_net)):
         phi = phi_net[i][-1]  # price of word's end
@@ -178,7 +178,7 @@ def calculate_end_states_prices(phonemes_net, phi_net, words_list, unigrams, lea
     return prices_ends_phonemes
 
 
-def viterbi_iterative(leaves, min_price_end_value, min_price_token, observations, phi_net, phonemes_net, t, token_net):
+def viterbi_iterative(leaves: dict, min_price_end_value, min_price_token, observations: list, phi_net: list, phonemes_net: list, t: int, token_net: list):
     for w in range(len(phi_net)):
         last_phi = phi_net[w].copy()
         last_token = token_net[w].copy()
@@ -193,8 +193,8 @@ def viterbi_iterative(leaves, min_price_end_value, min_price_token, observations
                                             token_net, w)
 
 
-def viterbi_iterative_first_phoneme(last_phi, last_token, leaves, min_price_end_value, min_price_token, observations,
-                                    phi_net, phonemes_list, t, token_net, w):
+def viterbi_iterative_first_phoneme(last_phi, last_token, leaves: dict, min_price_end_value, min_price_token, observations: list,
+                                    phi_net: list, phonemes_list: list, t: int, token_net: list, w: int):
     first_phoneme = phonemes_list[0]
     loop_prob = leaves_dict[first_phoneme][0]
     price = min(min_price_end_value, last_phi[0] + loop_prob)
@@ -207,8 +207,8 @@ def viterbi_iterative_first_phoneme(last_phi, last_token, leaves, min_price_end_
     token_net[w][0] = token
 
 
-def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observations, phi_net, phonemes_list, t, token_net,
-                                    w):
+def viterbi_iterative_next_phonemes(j: int, last_phi, last_token, leaves: dict, observations: list, phi_net: list, phonemes_list: list, t: int, token_net: list,
+                                    w: int):
     previous_phoneme = phonemes_list[j - 1]
     current_phoneme = phonemes_list[j]
     previous_phi = last_phi[j - 1] + leaves_dict[previous_phoneme][1]  # previous + transition probability
@@ -225,7 +225,7 @@ def viterbi_iterative_next_phonemes(j, last_phi, last_token, leaves, observation
     token_net[w][j] = token
 
 
-def count_minimal_price(phi_net, phonemes_net, words_list, unigrams, L_gamma, beta, leaves_dict):
+def count_minimal_price(phi_net: list, phonemes_net: list, words_list: list, unigrams: dict, L_gamma, beta, leaves_dict: dict):
     res = calculate_end_states_prices(phonemes_net, phi_net, words_list, unigrams, leaves_dict, beta, L_gamma)
     final_min_price = min(res)
 
@@ -241,19 +241,20 @@ def get_spoken_words(final_min_price, prices_ends_phonemes: list, tokens_list: l
     :param words_list:
     :return: spoken words - list
     """
+    spoken_words_list = []
+
     final_min_index = prices_ends_phonemes.index(final_min_price)
     final_min_token = token_net[final_min_index][-1]
 
     previous_token_index = final_min_token
     last_word = words_list[final_min_index]
-    spoken_words_list = [last_word]
+    spoken_words_list.append(last_word)
     while previous_token_index != 0:
         spoken_words_list.append(tokens_list[previous_token_index][0])
         previous_token_index = tokens_list[previous_token_index][1]
     spoken_words_list.reverse()
 
     return spoken_words_list
-
 
 if __name__ == "__main__":
     # Paths to files
