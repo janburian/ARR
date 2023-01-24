@@ -1,4 +1,4 @@
-# Modules import# Modules import
+# Modules import
 import math
 from pathlib import Path
 
@@ -46,7 +46,7 @@ def create_dictionary(ngrams_sentences: list, n: int):
                 else:
                     dictionary[key] += 1
 
-    return dictionary # dictionary with ngrams frequencies
+    return dictionary  # dictionary with ngrams frequencies
 
 
 def get_words_train(train_sentences: list):
@@ -78,14 +78,14 @@ def check_words_dictionary(list_sentence_words: list, dictionary: set):
     return list_sentence_words
 
 
-def trimm_off_trigrams(trigrams: dict, frequency: int):
+def trim_off_ngrams(ngrams: dict, frequency: int):
     keys_to_delete = []
-    for key in trigrams:
-        if trigrams[key] == frequency:
+    for key in ngrams:
+        if ngrams[key] == frequency:
             keys_to_delete.append(key)
 
     for key_delete in keys_to_delete:
-        del trigrams[key_delete]
+        del ngrams[key_delete]
 
 
 def count_words(words_list: list):
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     trigrams_dictionary = create_dictionary(trigrams, 3)
 
     # Trimming off trigrams with frequency = 1
-    trimm_off_trigrams(trigrams_dictionary, 1)
+    trim_off_ngrams(trigrams_dictionary, 1)
 
     # Creating ARPA file
     create_ARPA_file(path_export_ARPA_file, zerograms, unigrams_dictionary, bigrams_dictionary, trigrams_dictionary)
